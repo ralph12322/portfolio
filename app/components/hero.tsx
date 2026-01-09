@@ -4,14 +4,14 @@ import { Github, Linkedin, Mail, ChevronDown } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="pt-32 pb-20 px-6">
+    <section className="pt-65 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left side - Text content */}
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-6xl font-bold">
-              Hi, I'm <span className="bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">Ralph Geo Santos</span>
-            </h1>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight animate-fade-in">
+  Hi, I'm <span className="bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">Ralph Geo Santos!</span>
+</h1>
             <p className="text-lg md:text-xl text-stone-600">
               4th year Computer Science| Full-Stack Developer | Problem solver | Tech Enthusiast
             </p>
