@@ -24,7 +24,7 @@ export default function Portfolio() {
     },
     {
       title: "EmoVOX | Baby-Thesis Project",
-      description: "Created an end-to-end ML pipeline for image classification with data preprocessing, model training, and deployment infrastructure.",
+      description: "Built an emotion-aware translation application integrating speech-to-text and text-to-speech functionality with emotion detection to enhance user communication experience.",
       tech: ["React", "Node.js", "Express", "Tailwind CSS"],
       github: "#",
       demo: "https://emovox.vercel.app/"
