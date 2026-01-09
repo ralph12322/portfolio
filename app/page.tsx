@@ -33,7 +33,7 @@ export default function Portfolio() {
 
   const skills = {
     "Languages": ["Python", "JavaScript", "TypeScript"],
-    "Web": ["React", "Next.js", "Node.js", "Express", "FastAPI"],
+    "Web": ["React", "Next.js", "Node.js", "Express"],
     "Database": ["MongoDB"],
     "Tools & Other": ["Git"]
   };
