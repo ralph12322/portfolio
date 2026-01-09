@@ -100,7 +100,7 @@ export default function Portfolio() {
                     href={nav.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="capitalize transition-colors text-stone-600 hover:text-stone-900 px-2 py-1"
+                    className="capitalize transition-colors text-orange-400 hover:text-stone-900 px-2 py-1"
                   >
                     {nav.title}
                   </a>
