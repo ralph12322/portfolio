@@ -4,7 +4,7 @@ import { Github, Linkedin, Mail, ChevronDown } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="pt-65 pb-20 px-6">
+    <section className="lg:pt-65 pt-20 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left side - Text content */}
