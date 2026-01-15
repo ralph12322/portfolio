@@ -30,17 +30,14 @@ export default function Hero() {
 
           {/* Right side - Hero Image */}
           <div className="relative">
-            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+            <div className="relative w-[500px] h-[500px] overflow-hidden rounded-2xl shadow-2xl">
               {/* Replace this src with your actual image path */}
               <img 
-                src="./hero-me.png" 
+                src="./heroMe.jfif" 
                 alt="Ralph Geo Santos" 
-                className="w-full h-auto object-cover"
+                className="w-full h-full object-cover"
               />
-              {/* Placeholder background - remove when you add your image */}
-              {/* <div className="absolute inset-0 bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center">
-                <span className="text-stone-50 text-8xl font-bold">RG</span>
-              </div> */}
+              
             </div>
             
             {/* Optional decorative element */}
