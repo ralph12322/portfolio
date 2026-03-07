@@ -3,11 +3,11 @@ const nextConfig: import('next').NextConfig = {
   async headers() {
     return [
       {
-        source: '/music/:file*.mp3',
+        source: '/music/(.*).mp3',
         headers: [{ key: 'Content-Type', value: 'audio/mpeg' }],
       },
       {
-        source: '/music/:file*.mp4',
+        source: '/music/(.*).mp4',
         headers: [{ key: 'Content-Type', value: 'video/mp4' }],
       },
     ];
