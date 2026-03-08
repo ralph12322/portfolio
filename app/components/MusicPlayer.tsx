@@ -3,26 +3,56 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────
 interface Track {
-  id: number;
+  id: string;
   title: string;
   artist: string;
   src: string;
   color: string;
   initials: string;
+  albumArt?: string;
 }
 
-// ── Tracklist ─────────────────────────────────────────────────────
-const TRACKS: Track[] = [
-  { id: 1, title: "Ikigai", artist: "Dionela ft. Loonie", src: "/music/ikigai.mp3", color: "#f97316", initials: "DL" },
-  { id: 2, title: "Malay Ko", artist: "Ralph Geo Santos (Cover)", src: "/music/malay-ko.mp4", color: "#ea580c", initials: "RGS" },
-  { id: 3, title: "Pahintulot", artist: "Shirebound", src: "/music/pahintulot.mp3", color: "#f59e0b", initials: "SB" },
-  { id: 4, title: "Estranghero", artist: "Cup of Joe", src: "/music/estranghero.mp3", color: "#34d399", initials: "CJ" },
-  { id: 5, title: "Misteryoso", artist: "Cup of Joe", src: "/music/misteryoso.mp3", color: "#22c55e", initials: "CJ" },
-  { id: 6, title: "Little Things", artist: "One Direction", src: "/music/little-things.mp3", color: "#60a5fa", initials: "1D" },
-  { id: 7, title: "Luther", artist: "Kendrick Lamar", src: "/music/luther.mp3", color: "#a78bfa", initials: "KL" },
-  { id: 8, title: "The Gift", artist: "Ralph Geo Santos (Cover)", src: "/music/the-gift.mp3", color: "#1c6a97", initials: "RGS" },
-  { id: 9, title: "Naiilang", artist: "Ralph Geo Santos (Cover)", src: "/music/naiilang.mp4", color: "#959e17", initials: "RGS" },
+// ── API Song shape (matches your Mongoose model) ──────────────────
+interface ApiSong {
+  _id: string;
+  name: string;
+  desc?: string;
+  album?: string;
+  image?: string;
+  file: string;
+  duration?: string;
+}
+
+// ── Color palette for dynamic assignment ──────────────────────────
+const TRACK_COLORS = [
+  "#f97316", "#ea580c", "#f59e0b", "#34d399", "#22c55e",
+  "#60a5fa", "#a78bfa", "#1c6a97", "#959e17", "#e879f9",
+  "#f43f5e", "#14b8a6",
 ];
+
+function colorForIndex(i: number): string {
+  return TRACK_COLORS[i % TRACK_COLORS.length];
+}
+
+function initialsFor(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+function mapApiSong(song: ApiSong, i: number): Track {
+  return {
+    id: song._id,
+    title: song.name,
+    artist: song.album ?? song.desc ?? "Unknown",
+    src: song.file,
+    color: colorForIndex(i),
+    initials: initialsFor(song.name),
+    albumArt: song.image,
+  };
+}
 
 // ── Helpers ────────────────────────────────────────────────────────
 function fmt(s: number): string {
@@ -63,12 +93,23 @@ const IconVolume = () => (
     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
   </svg>
 );
+const IconLoader = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"
+    style={{ animation: "spin 1s linear infinite" }}>
+    <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+    <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+  </svg>
+);
 
 // ── Component ──────────────────────────────────────────────────────
 type PlayerState = "open" | "collapsed" | "hidden";
 
 export default function MusicPlayer() {
   const [state, setState] = useState<PlayerState>("collapsed");
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [trackIdx, setTrackIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -78,13 +119,36 @@ export default function MusicPlayer() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
-  // Track whether this is the very first mount load
   const isFirstLoad = useRef(true);
 
-  const track = TRACKS[trackIdx];
+  const track = tracks[trackIdx];
 
-  // ── Audio setup — runs ONCE on mount ──────────────────────────
+  // ── Fetch tracks from API ─────────────────────────────────────
   useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("/api/songs");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message ?? "Failed to fetch songs");
+        const mapped: Track[] = (data.songs as ApiSong[]).map(mapApiSong);
+        if (mapped.length === 0) throw new Error("No songs found");
+        setTracks(mapped);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load songs");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSongs();
+  }, []);
+
+  // ── Audio setup — runs when tracks are ready ──────────────────
+  useEffect(() => {
+    if (tracks.length === 0) return;
+
     const audio = new Audio();
     audio.volume = volume;
     audioRef.current = audio;
@@ -94,20 +158,18 @@ export default function MusicPlayer() {
     };
     const onDuration = () => setDuration(audio.duration);
     const onEnded = () => {
-      setTrackIdx((i) => (i + 1) % TRACKS.length);
+      setTrackIdx((i) => (i + 1) % tracks.length);
     };
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("loadedmetadata", onDuration);
     audio.addEventListener("ended", onEnded);
 
-    // Load first track and attempt autoplay
-    audio.src = TRACKS[0].src;
+    audio.src = tracks[0].src;
     audio.load();
-    audio
-      .play()
+    audio.play()
       .then(() => setIsPlaying(true))
-      .catch(() => setIsPlaying(false)); // browsers will usually block this — that's fine
+      .catch(() => setIsPlaying(false));
 
     return () => {
       audio.pause();
@@ -116,17 +178,18 @@ export default function MusicPlayer() {
       audio.removeEventListener("ended", onEnded);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [tracks]);
 
-  // ── Load track when index changes (skip the very first mount) ──
+  // ── Load track when index changes ─────────────────────────────
   useEffect(() => {
+    if (tracks.length === 0) return;
     if (isFirstLoad.current) {
       isFirstLoad.current = false;
       return;
     }
     const audio = audioRef.current;
     if (!audio) return;
-    audio.src = TRACKS[trackIdx].src;
+    audio.src = tracks[trackIdx].src;
     audio.load();
     setCurrentTime(0);
     setDuration(0);
@@ -152,8 +215,8 @@ export default function MusicPlayer() {
   }, [isPlaying]);
 
   const handleNext = useCallback(() => {
-    setTrackIdx((i) => (i + 1) % TRACKS.length);
-  }, []);
+    setTrackIdx((i) => (i + 1) % tracks.length);
+  }, [tracks.length]);
 
   const handlePrev = useCallback(() => {
     const audio = audioRef.current;
@@ -161,9 +224,9 @@ export default function MusicPlayer() {
       audio.currentTime = 0;
       setCurrentTime(0);
     } else {
-      setTrackIdx((i) => (i - 1 + TRACKS.length) % TRACKS.length);
+      setTrackIdx((i) => (i - 1 + tracks.length) % tracks.length);
     }
-  }, []);
+  }, [tracks.length]);
 
   // ── Progress scrubbing ─────────────────────────────────────────
   const seek = useCallback(
@@ -181,7 +244,6 @@ export default function MusicPlayer() {
 
   const progressPct = duration ? (currentTime / duration) * 100 : 0;
 
-  // ── Select track from list ─────────────────────────────────────
   const selectTrack = useCallback(
     (i: number) => {
       setTrackIdx(i);
@@ -191,6 +253,87 @@ export default function MusicPlayer() {
       }
     },
     [isPlaying]
+  );
+
+  // ── Loading / Error states ─────────────────────────────────────
+  if (loading) {
+    return (
+      <div style={{
+        position: "fixed", bottom: 24, right: 24, zIndex: 300,
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "10px 14px",
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        borderRadius: 999,
+        border: "1px solid rgba(0,0,0,0.08)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
+        fontSize: 12, color: "#78716c",
+      }}>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <IconLoader />
+        Loading tracks…
+      </div>
+    );
+  }
+
+  if (error || tracks.length === 0) {
+    return (
+      <div style={{
+        position: "fixed", bottom: 24, right: 24, zIndex: 300,
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "10px 14px",
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderRadius: 999,
+        border: "1px solid #fecaca",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
+        fontSize: 12, color: "#ef4444",
+      }}>
+        ⚠ {error ?? "No tracks available"}
+      </div>
+    );
+  }
+
+  // ── Album art tile ─────────────────────────────────────────────
+  const AlbumTile = ({ size, fontSize }: { size: number; fontSize: number }) => (
+    <div style={{
+      width: size, height: size, borderRadius: size * 0.24, flexShrink: 0,
+      background: track.albumArt
+        ? undefined
+        : `linear-gradient(135deg, ${track.color}, ${track.color}88)`,
+      backgroundImage: track.albumArt ? `url(${track.albumArt})` : undefined,
+      backgroundSize: "cover", backgroundPosition: "center",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: size > 40 ? `0 6px 20px ${track.color}40` : undefined,
+      position: "relative", overflow: "hidden",
+    }}>
+      {!track.albumArt && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 60%)",
+        }} />
+      )}
+      {isPlaying ? (
+        <div style={{ display: "flex", gap: size > 40 ? 3 : 2, alignItems: "flex-end", height: size * 0.35, zIndex: 1 }}>
+          {(size > 40 ? [0, 1, 2, 3] : [0, 1, 2]).map((b) => (
+            <div key={b} style={{
+              width: size > 40 ? 3 : 2.5,
+              background: track.albumArt ? "rgba(255,255,255,0.9)" : "#fff",
+              borderRadius: 2,
+              height: size > 40 ? ([10, 18, 14, 8][b]) : ([6, 14, 10][b]),
+              animation: `equalizerBar${b % 3} 0.7s ease-in-out ${b * 0.12}s infinite alternate`,
+              opacity: 0.9,
+            }} />
+          ))}
+        </div>
+      ) : !track.albumArt ? (
+        <span style={{ fontSize, fontWeight: 800, color: "#fff", zIndex: 1 }}>
+          {track.initials}
+        </span>
+      ) : null}
+    </div>
   );
 
   // ── Render ─────────────────────────────────────────────────────
@@ -213,6 +356,7 @@ export default function MusicPlayer() {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .player-btn {
           background: none; border: none; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
@@ -276,27 +420,8 @@ export default function MusicPlayer() {
             animation: "playerFadeUp 0.35s cubic-bezier(0.34,1.56,0.64,1) both",
           }}
         >
-          {/* Album tile */}
-          <div style={{
-            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-            background: `linear-gradient(135deg, ${track.color}, ${track.color}aa)`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 9, fontWeight: 800, color: "#fff",
-          }}>
-            {isPlaying ? (
-              <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 14 }}>
-                {[0, 1, 2].map((b) => (
-                  <div key={b} style={{
-                    width: 2.5, background: "#fff", borderRadius: 1,
-                    animation: `equalizerBar${b} 0.8s ease-in-out ${b * 0.15}s infinite alternate`,
-                    height: b === 1 ? 10 : 6,
-                  }} />
-                ))}
-              </div>
-            ) : track.initials}
-          </div>
+          <AlbumTile size={30} fontSize={9} />
 
-          {/* Title */}
           <div style={{ minWidth: 0, maxWidth: 110 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "#1c1917", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {track.title}
@@ -306,7 +431,6 @@ export default function MusicPlayer() {
             </div>
           </div>
 
-          {/* Play/Pause */}
           <button
             onClick={togglePlay}
             style={{
@@ -323,7 +447,6 @@ export default function MusicPlayer() {
             {isPlaying ? <IconPause /> : <IconPlay />}
           </button>
 
-          {/* Expand */}
           <button
             onClick={() => setState("open")}
             style={{
@@ -340,7 +463,6 @@ export default function MusicPlayer() {
             </svg>
           </button>
 
-          {/* Close */}
           <button
             onClick={() => setState("hidden")}
             style={{
@@ -380,38 +502,8 @@ export default function MusicPlayer() {
             borderBottom: `1px solid ${track.color}12`,
           }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 14 }}>
+              <AlbumTile size={58} fontSize={13} />
 
-              {/* Album art */}
-              <div style={{
-                width: 58, height: 58, borderRadius: 14, flexShrink: 0,
-                background: `linear-gradient(135deg, ${track.color}, ${track.color}88)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: `0 6px 20px ${track.color}40`,
-                position: "relative", overflow: "hidden",
-              }}>
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 60%)",
-                }} />
-                {isPlaying ? (
-                  <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 20, zIndex: 1 }}>
-                    {[0, 1, 2, 3].map((b) => (
-                      <div key={b} style={{
-                        width: 3, background: "#fff", borderRadius: 2,
-                        height: [10, 18, 14, 8][b],
-                        animation: `equalizerBar${b % 3} 0.7s ease-in-out ${b * 0.12}s infinite alternate`,
-                        opacity: 0.9,
-                      }} />
-                    ))}
-                  </div>
-                ) : (
-                  <span style={{ fontSize: 13, fontWeight: 800, color: "#fff", zIndex: 1 }}>
-                    {track.initials}
-                  </span>
-                )}
-              </div>
-
-              {/* Track info */}
               <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
                 <div className="track-name-wrap">
                   <div
@@ -427,11 +519,10 @@ export default function MusicPlayer() {
                   {track.artist}
                 </div>
                 <div style={{ fontSize: 9, color: track.color, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 5 }}>
-                  {trackIdx + 1} / {TRACKS.length}
+                  {trackIdx + 1} / {tracks.length}
                 </div>
               </div>
 
-              {/* Collapse + Close */}
               <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
                 <button
                   onClick={() => setState("collapsed")}
@@ -495,7 +586,6 @@ export default function MusicPlayer() {
               </div>
             </div>
 
-            {/* Time */}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#a8a29e", fontFamily: "monospace", fontWeight: 600 }}>
               <span>{fmt(currentTime)}</span>
               <span>{fmt(duration)}</span>
@@ -505,8 +595,6 @@ export default function MusicPlayer() {
           {/* Controls */}
           <div style={{ padding: "14px 20px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginBottom: 14 }}>
-
-              {/* Prev */}
               <button
                 className="player-btn"
                 onClick={handlePrev}
@@ -522,7 +610,6 @@ export default function MusicPlayer() {
                 <IconPrev />
               </button>
 
-              {/* Play/Pause */}
               <button
                 onClick={togglePlay}
                 style={{
@@ -539,7 +626,6 @@ export default function MusicPlayer() {
                 {isPlaying ? <IconPause /> : <IconPlay />}
               </button>
 
-              {/* Next */}
               <button
                 className="player-btn"
                 onClick={handleNext}
@@ -580,7 +666,7 @@ export default function MusicPlayer() {
               justifyContent: "center", marginTop: 14,
               maxHeight: 72, overflowY: "auto",
             }}>
-              {TRACKS.map((t, i) => (
+              {tracks.map((t, i) => (
                 <button
                   key={t.id}
                   onClick={() => selectTrack(i)}
