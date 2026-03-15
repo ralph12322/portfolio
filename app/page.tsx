@@ -1,116 +1,79 @@
 'use client';
 import { useState, useEffect, useRef, ReactNode } from "react";
-import { Github, Linkedin, Mail, Facebook, ExternalLink, ChevronDown, Music, Film, Gamepad2, X, ArrowUpRight } from "lucide-react";
+import {
+  Github, Linkedin, Mail, Facebook, ExternalLink,
+  Music, Film, Gamepad2, X, ArrowUpRight, GitCommit,
+  GitPullRequest, Star, Zap, Code2, Layers, Database,
+  Terminal, CheckCircle2, Instagram, Clapperboard, SquareChevronRight,
+} from "lucide-react";
 import Navbar from "./components/Navbar";
 import MusicPlayer from "./components/MusicPlayer";
+import SkillsBubble from "./components/SkillCarousel";
 
-// ── Types ──────────────────────────────────────────────────────────
-interface Project {
-  title: string;
-  tag: string;
-  description: string;
-  tech: string[];
-  github: string;
-  demo: string;
-  accent: string;
-  num: string;
-}
+interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
+interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
+interface InterestItem { label: string; sub: string; }
+interface Interest { category: string; icon: ReactNode; accent: string; description: string; items: InterestItem[]; }
+interface PanelProps { open: boolean; onClose: () => void; children: ReactNode; }
+interface PanelHeaderProps { label: string; title: string; italic?: string; onClose: () => void; }
 
-interface TimelineItem {
-  year: string;
-  title: string;
-  company: string;
-  description: string;
-  accent: string;
-}
-
-interface InterestItem {
-  label: string;
-  sub: string;
-}
-
-interface Interest {
-  category: string;
-  icon: ReactNode;
-  accent: string;
-  description: string;
-  items: InterestItem[];
-}
-
-interface PanelProps {
-  open: boolean;
-  onClose: () => void;
-  children: ReactNode;
-}
-
-interface PanelHeaderProps {
-  label: string;
-  title: string;
-  italic?: string;
-  onClose: () => void;
-}
-
-// ── Hooks ──────────────────────────────────────────────────────────
-function useInView(threshold = 0.15): [React.RefObject<HTMLDivElement | null>, boolean] {
+function useInView(threshold = 0.1): [React.RefObject<HTMLDivElement | null>, boolean] {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
+    // rootMargin pulls the trigger zone 60px above the bottom edge,
+    // so elements reveal before they fully scroll into view — fixes
+    // the mobile single-column reflow where items start below the fold.
+    // threshold:0 means fire as soon as even 1px is visible.
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) setVisible(true); },
-      { threshold }
+      { threshold: 0, rootMargin: "0px 0px 0px 0px" }
     );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
-  }, [threshold]);
+  }, []); // no dep on threshold — we use fixed 0 for reliability
   return [ref, visible];
 }
 
-// ── Components ──────────────────────────────────────────────────────
-interface RevealProps {
-  children: ReactNode;
-  delay?: number;
-  style?: React.CSSProperties;
+function GitHubStats({ username }: { username: string }) {
+  const [repos, setRepos] = useState<string>("…");
+  const [contributions, setContributions] = useState<string>("…");
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${username}`)
+      .then(r => r.json()).then(d => setRepos(String(d.public_repos ?? "—"))).catch(() => setRepos("—"));
+    fetch(`https://github-contributions-api.jogruber.de/v4/${username}`)
+      .then(r => r.json()).then(d => {
+        const total = Object.values(d.total as Record<string, number>).reduce((a, v) => a + v, 0);
+        setContributions(String(total));
+      });
+  }, [username]);
+  return (
+    <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+      {[{ label: "REPOS", value: repos }, { label: "CONTRIBUTIONS", value: contributions }].map((s, i) => (
+        <div key={i} style={{ flex: 1, background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 8, padding: "9px 11px" }}>
+          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: "#3a3733", marginBottom: 3, fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: "#2dd4bf", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-1px" }}>{s.value}</div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-function Reveal({ children, delay = 0, style = {} }: RevealProps) {
+function Reveal({ children, delay = 0, style = {} }: { children: ReactNode; delay?: number; style?: React.CSSProperties }) {
   const [ref, visible] = useInView();
   return (
-    <div ref={ref} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(28px)",
-      transition: `opacity 0.65s ease ${delay}s, transform 0.65s ease ${delay}s`,
-      ...style
-    }}>{children}</div>
+    <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(18px)", transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s`, ...style }}>
+      {children}
+    </div>
   );
 }
 
 function Panel({ open, onClose, children }: PanelProps) {
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
-
+  useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
   return (
     <>
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed", inset: 0, zIndex: 199,
-          background: "rgba(0,0,0,0.55)",
-          opacity: open ? 1 : 0,
-          pointerEvents: open ? "auto" : "none",
-          transition: "opacity 0.4s ease",
-          backdropFilter: open ? "blur(4px)" : "none"
-        }}
-      />
-      <div style={{
-        position: "fixed", top: 0, right: 0, bottom: 0, zIndex: 200,
-        width: "min(90vw, 1100px)",
-        background: "#0c0b09",
-        transform: open ? "translateX(0)" : "translateX(100%)",
-        transition: "transform 0.55s cubic-bezier(0.77,0,0.175,1)",
-        display: "flex", flexDirection: "column", overflow: "hidden"
-      }}>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.6)", opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none", transition: "opacity 0.35s", backdropFilter: open ? "blur(6px)" : "none" }} />
+      <div className="panel-drawer" style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}>
         {children}
       </div>
     </>
@@ -119,143 +82,98 @@ function Panel({ open, onClose, children }: PanelProps) {
 
 function PanelHeader({ label, title, italic, onClose }: PanelHeaderProps) {
   return (
-    <div style={{
-      padding: "clamp(24px,4vw,40px) clamp(20px,4vw,52px) 28px",
-      borderBottom: "1px solid #1f1e1b",
-      flexShrink: 0,
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start"
-    }}>
-      <div>
-        <div style={{ fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: "#57534e", fontWeight: 700, marginBottom: 10 }}>{label}</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px,3.5vw,48px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-1.5px", margin: 0, lineHeight: 1.1 }}>
-          {title}{italic && <span style={{ color: "#f97316", fontStyle: "italic" }}> {italic}</span>}
+    <div style={{ padding: "clamp(14px,3vw,36px) clamp(14px,4vw,48px) 18px", borderBottom: "1px solid #1f1e1b", flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: "#57534e", fontWeight: 700, marginBottom: 8 }}>{label}</div>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(20px,4vw,44px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-1px", margin: 0, lineHeight: 1.1 }}>
+          {title}{italic && <span style={{ color: "#2dd4bf", fontStyle: "italic" }}> {italic}</span>}
         </h2>
       </div>
-      <button
-        onClick={onClose}
-        style={{
-          background: "#1a1916", border: "1px solid #2a2825", cursor: "pointer",
-          borderRadius: "50%", width: 42, height: 42,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0, marginLeft: 16,
-          transition: "background 0.2s, transform 0.3s"
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "#2a2825"; e.currentTarget.style.transform = "rotate(90deg)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "#1a1916"; e.currentTarget.style.transform = "rotate(0)"; }}
-      >
-        <X style={{ width: 17, height: 17, color: "#78716c" }} />
+      <button className="close-btn" onClick={onClose} aria-label="Close panel">
+        <X style={{ width: 16, height: 16, color: "#78716c" }} />
       </button>
     </div>
   );
 }
 
-// ── Data ──────────────────────────────────────────────────────────
+function LiveClock() {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    const tick = () => setTime(new Date().toLocaleTimeString("en-US", { hour12: false }));
+    tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
+  }, []);
+  return <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#78716c", letterSpacing: 1 }}>{time}</span>;
+}
+
+function VisitorCount() {
+  const [count, setCount] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/visitors").then(r => r.json()).then(d => setCount(Number(d.visitors).toLocaleString())).catch(() => setCount("—"));
+  }, []);
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+      <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2dd4bf", flexShrink: 0, animation: "pulse 2s infinite" }} />
+      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#78716c", letterSpacing: 1 }}>{count ?? "…"} visitors</span>
+    </div>
+  );
+}
+
 const projects: Project[] = [
-  {
-    title: "TrackTag",
-    tag: "Thesis Project",
-    description: "Full-stack price tracking platform monitoring apparel prices and reviews from Amazon and Lazada via automated web scraping. Includes a dashboard to visualize price history and trends.",
-    tech: ["Next.js", "TypeScript", "Node.js", "MongoDB"],
-    github: "https://github.com/ralph12322/tracktag",
-    demo: "https://tracktag-production.up.railway.app/",
-    accent: "#f97316",
-    num: "01"
-  },
-  {
-    title: "Spotify Clone",
-    tag: "Hubby Project",
-    description: "Responsive music streaming app inspired by Spotify's UI. Full audio upload, playback controls, playlist management, and cloud-hosted media via Cloudinary.",
-    tech: ["React", "Node.js", "JavaScript", "Tailwind CSS", "Cloudinary", "MongoDB"],
-    github: "https://github.com/ralph12322/Spotify-Clone",
-    demo: "https://lindsaaayspoti.vercel.app/",
-    accent: "#22c55e",
-    num: "02"
-  },
-  {
-    title: "EmoVOX",
-    tag: "Baby-Thesis Project",
-    description: "Emotion-aware translation app integrating speech-to-text, text-to-speech, and real-time emotion detection to enhance how people communicate.",
-    tech: ["React", "Node.js", "Express", "Tailwind CSS"],
-    github: "#",
-    demo: "https://emovox.vercel.app/",
-    accent: "#a78bfa",
-    num: "03"
-  }
+  { title: "TrackTag", tag: "Thesis Project", description: "Full-stack price tracking platform monitoring apparel prices and reviews from Amazon and Lazada via automated web scraping. Dashboard to visualize price history and trends.", tech: ["Next.js", "TypeScript", "Node.js", "MongoDB"], github: "https://github.com/ralph12322/tracktag", demo: "https://tracktag-production.up.railway.app/", accent: "#2dd4bf", num: "01" },
+  { title: "Spotify Clone", tag: "Hubby Project", description: "Responsive music streaming app inspired by Spotify's UI. Full audio upload, playback controls, playlist management, and cloud-hosted media via Cloudinary.", tech: ["React", "Node.js", "JavaScript", "Tailwind CSS", "Cloudinary", "MongoDB"], github: "https://github.com/ralph12322/Spotify-Clone", demo: "https://lindsaaayspoti.vercel.app/", accent: "#14b8a6", num: "02" },
+  { title: "EmoVOX", tag: "Baby-Thesis", description: "Emotion-aware translation app integrating speech-to-text, text-to-speech, and real-time emotion detection to enhance how people communicate.", tech: ["React", "Node.js", "Express", "Tailwind CSS"], github: "#", demo: "https://emovox.vercel.app/", accent: "#5eead4", num: "03" }
 ];
 
 const timeline: TimelineItem[] = [
-  { year: "2026", title: "Fullstack Web Developer Intern", company: "Jurisprudence Application Services", description: "Built Paysync — a payroll automation system designed for accountants.", accent: "#f97316" },
-  { year: "2025", title: "Thesis Defense", company: "University", description: "Defended TrackTag successfully. Earned commendation from the panel.", accent: "#fbbf24" },
-  { year: "2024", title: "Baby-Thesis Completion", company: "University Lab", description: "Shipped EmoVOX as a collaborative AI + speech processing research project.", accent: "#a78bfa" },
-  { year: "2023", title: "Went Deep into Full-Stack", company: "Self-taught", description: "Immersed in the MERN stack, built multiple personal projects, sharpened TypeScript skills.", accent: "#34d399" },
-  { year: "2022", title: "CS Journey Begins", company: "University", description: "First lines of Python and JavaScript. Fell in love with programming from day one.", accent: "#60a5fa" },
+  { year: "2026", title: "Fullstack Web Developer Intern", company: "Jurisprudence Application Services", description: "Built Paysync — a payroll automation system designed for accountants.", accent: "#2dd4bf" },
+  { year: "2025", title: "Thesis Defense", company: "University", description: "Defended TrackTag successfully. Earned commendation from the panel.", accent: "#99f6e4" },
+  { year: "2024", title: "Baby-Thesis Completion", company: "University Lab", description: "Shipped EmoVOX as a collaborative AI + speech processing research project.", accent: "#5eead4" },
+  { year: "2023", title: "Went Deep into Full-Stack", company: "Self-taught", description: "Immersed in the MERN stack, built multiple personal projects, sharpened TypeScript skills.", accent: "#14b8a6" },
+  { year: "2022", title: "CS Journey Begins", company: "University", description: "First lines of Python and JavaScript. Fell in love with programming from day one.", accent: "#0d9488" },
 ];
 
 const interests: Interest[] = [
-  {
-    category: "Music",
-    icon: <Music style={{ width: 20, height: 20 }} />,
-    accent: "#ec4899",
-    description: "Music is woven into my day — OPM when I need to feel something, lo-fi when I need to focus.",
-    items: [
-      { label: "OPM / Filipino Music", sub: "Ben&Ben, IV of Spades, Cup of Joe, SB19" },
-      { label: "Lo-fi / Chill", sub: "Late-night coding sessions and deep focus" },
-      { label: "Bedroom Pop", sub: "Soft, dreamy vibes for any mood" },
-      { label: "Acoustic Sets", sub: "Raw, stripped-back and emotional" }
-    ]
-  },
-  {
-    category: "Film & Shows",
-    icon: <Film style={{ width: 20, height: 20 }} />,
-    accent: "#818cf8",
-    description: "A good story gets me every time — emotional anime arcs, slow-burn romances, high-stakes thrillers.",
-    items: [
-      { label: "Anime", sub: "AOT, Haikyuu, Vinland Saga, Demon Slayer" },
-      { label: "Romance / Drama", sub: "Kilig moments and emotional gut punches" },
-      { label: "Action / Thriller", sub: "Edge-of-seat tension and satisfying payoffs" },
-      { label: "Slice of Life", sub: "Calm, relatable, oddly comforting" }
-    ]
-  },
-  {
-    category: "Gaming",
-    icon: <Gamepad2 style={{ width: 20, height: 20 }} />,
-    accent: "#fbbf24",
-    description: "My go-to unwind — anything with a great story or competitive depth, mobile or PC.",
-    items: [
-      { label: "Story-Driven RPGs", sub: "Deep lore and memorable characters" },
-      { label: "Battle Royale / FPS", sub: "When it's time to go sweaty mode" },
-      { label: "Indie Gems", sub: "Surprising, creative, underrated finds" },
-      { label: "Mobile Games", sub: "Quick sessions on the go" }
-    ]
-  }
+  { category: "Music", icon: <Music style={{ width: 18, height: 18 }} />, accent: "#2dd4bf", description: "Music is woven into my day — OPM when I need to feel something, lo-fi when I need to focus.", items: [{ label: "OPM / Filipino Music", sub: "Ben&Ben, IV of Spades, Cup of Joe, SB19" }, { label: "Lo-fi / Chill", sub: "Late-night coding sessions and deep focus" }, { label: "Bedroom Pop", sub: "Soft, dreamy vibes for any mood" }, { label: "Acoustic Sets", sub: "Raw, stripped-back and emotional" }] },
+  { category: "Film & Shows", icon: <Film style={{ width: 18, height: 18 }} />, accent: "#14b8a6", description: "A good story gets me every time — emotional anime arcs, slow-burn romances, high-stakes thrillers.", items: [{ label: "Anime", sub: "AOT, Haikyuu, Vinland Saga, Demon Slayer" }, { label: "Romance / Drama", sub: "Kilig moments and emotional gut punches" }, { label: "Action / Thriller", sub: "Edge-of-seat tension and satisfying payoffs" }, { label: "Slice of Life", sub: "Calm, relatable, oddly comforting" }] },
+  { category: "Gaming", icon: <Gamepad2 style={{ width: 18, height: 18 }} />, accent: "#5eead4", description: "My go-to unwind — anything with a great story or competitive depth, mobile or PC.", items: [{ label: "Story-Driven RPGs", sub: "Deep lore and memorable characters" }, { label: "Battle Royale / FPS", sub: "When it's time to go sweaty mode" }, { label: "Indie Gems", sub: "Surprising, creative, underrated finds" }, { label: "Mobile Games", sub: "Quick sessions on the go" }] }
 ];
 
-const skills: Record<string, string[]> = {
-  "Languages": ["Python", "JavaScript", "TypeScript"],
-  "Web": ["React", "Next.js", "Node.js", "Express"],
-  "Database": ["MongoDB"],
-  "Tools": ["Git", "GitHub", "Vercel", "Railway"]
+const skills: Record<string, { label: string; icon: ReactNode }[]> = {
+  "Languages": [{ label: "Python", icon: <Code2 size={13} /> }, { label: "JavaScript", icon: <Code2 size={13} /> }, { label: "TypeScript", icon: <Code2 size={13} /> }],
+  "Web": [{ label: "React", icon: <Layers size={13} /> }, { label: "Next.js", icon: <Layers size={13} /> }, { label: "Node.js", icon: <Layers size={13} /> }, { label: "Express", icon: <Layers size={13} /> }],
+  "Database": [{ label: "MongoDB", icon: <Database size={13} /> }],
+  "Tools": [{ label: "Git", icon: <Terminal size={13} /> }, { label: "GitHub", icon: <Terminal size={13} /> }, { label: "Vercel", icon: <Terminal size={13} /> }, { label: "Railway", icon: <Terminal size={13} /> }]
 };
 
-// ── MAIN ──────────────────────────────────────────────────────────
+const roadmap = [
+  { phase: "Start · 2022", label: "Curiosity", desc: "Python & HTML/CSS", status: "done", accent: "#0d9488" },
+  { phase: "2023", label: "Foundation", desc: "MERN stack mastery", status: "done", accent: "#14b8a6" },
+  { phase: "2024", label: "Shipped Projects", desc: "EmoVOX & full-stack apps", status: "done", accent: "#5eead4" },
+  { phase: "2025", label: "Impact", desc: "Thesis + Internship ready", status: "done", accent: "#99f6e4" },
+  { phase: "2026+", label: "Growth", desc: "Next.js, TypeScript, DevOps", status: "active", accent: "#2dd4bf" },
+  { phase: "Future", label: "Vision", desc: "Senior Engineer & Mentor", status: "future", accent: "#0d9488" },
+];
+
+const interestTiles = [
+  { label: "Music & OPM", sub: "Ben&Ben, lo-fi, acoustic", icon: <Music />, color: "#2dd4bf", bg: "#0d2424" },
+  { label: "Anime & Film", sub: "AOT, Haikyuu, slice of life", icon: <Clapperboard />, color: "#14b8a6", bg: "#0a1f1f" },
+  { label: "Gaming", sub: "RPGs, FPS, mobile games", icon: <Gamepad2 />, color: "#5eead4", bg: "#0a1f1f" },
+  { label: "Coding", sub: "Side projects & learning", icon: <SquareChevronRight />, color: "#0d9488", bg: "#0d2424" },
+];
+
+const card: React.CSSProperties = { background: "#131211", border: "1px solid #1e1d1b", borderRadius: 12, overflow: "hidden" };
+
 export default function Portfolio() {
   const [panel, setPanel] = useState<string | null>(null);
   const [activeInterest, setActiveInterest] = useState(0);
   const [activeNav, setActiveNav] = useState<string | null>(null);
+  const [hoveredTile, setHoveredTile] = useState<number | null>(null);
 
-  const scrollTo = (id: string) => {
-    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
-    setActiveNav("Contact");
-  };
-  const open = (name: string) => {
-    setPanel(name);
-    setActiveNav(name.charAt(0).toUpperCase() + name.slice(1));
-  };
+  const scrollTo = (id: string) => { document.querySelector(id)?.scrollIntoView({ behavior: "smooth" }); setActiveNav("Contact"); };
+  const open = (name: string) => { setPanel(name); setActiveNav(name.charAt(0).toUpperCase() + name.slice(1)); };
   const close = () => { setPanel(null); setActiveNav(null); };
 
-  const navItems: { label: string; action: () => void }[] = [
+  const navItems = [
     { label: "About", action: () => open("about") },
     { label: "Projects", action: () => open("projects") },
     { label: "Experience", action: () => open("experience") },
@@ -264,273 +182,511 @@ export default function Portfolio() {
   ];
 
   return (
-    <div style={{ fontFamily: "'Sora', sans-serif", background: "#faf9f7", color: "#1c1917", minHeight: "100vh" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet" />
+    <div style={{ fontFamily: "'Sora', sans-serif", background: "#0a0908", color: "#e7e5e4", minHeight: "100vh" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
       <style>{`
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        * { box-sizing: border-box; }
-        @media (max-width: 768px) {
-          .hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; text-align: center; }
-          .hero-photo-wrap { width: min(320px, 80vw) !important; height: min(360px, 90vw) !important; margin: 0 auto; }
-          .hero-deco-br { bottom: -10px !important; right: -10px !important; width: 80px !important; height: 80px !important; }
-          .hero-deco-tl { top: -8px !important; left: -8px !important; width: 55px !important; height: 55px !important; }
-          .hero-socials { justify-content: center !important; }
-          .hero-btns { justify-content: center !important; }
-          .hero-badge { margin: 0 auto 20px !important; }
-          .cards-grid { grid-template-columns: repeat(2,1fr) !important; }
-          .panel-body-pad { padding: 28px 20px !important; }
-          .panel-header-pad { padding: 24px 20px 22px !important; }
-          .project-row { grid-template-columns: 1fr !important; gap: 12px !important; }
-          .project-row-num { display: none !important; }
-          .project-row-links { flex-direction: row !important; gap: 16px; }
-          .exp-row { grid-template-columns: 1fr !important; gap: 8px !important; }
-          .about-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
-          .interests-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
-          .contact-btns { flex-direction: column !important; align-items: center !important; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        @keyframes roadPulse { 0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,0.4)} 50%{box-shadow:0 0 0 8px rgba(45,212,191,0)} }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0a0908} ::-webkit-scrollbar-thumb{background:#2a2825;border-radius:2px}
+        a { text-decoration: none; }
+
+        /* ─── Panel drawer ─── */
+        .panel-drawer {
+          position: fixed; top: 0; right: 0; bottom: 0; z-index: 200;
+          width: min(96vw, 1100px);
+          background: #0d0c0a;
+          transition: transform 0.5s cubic-bezier(0.77,0,0.175,1);
+          display: flex; flex-direction: column; overflow: hidden;
+          border-left: 1px solid #1f1e1b;
         }
-        @media (max-width: 480px) {
-          .cards-grid { grid-template-columns: 1fr !important; }
+        .close-btn {
+          background: #1a1916; border: 1px solid #2a2825; cursor: pointer;
+          border-radius: 50%; width: 40px; height: 40px; min-width: 40px; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          margin-left: 12px; transition: background 0.2s, transform 0.3s;
+        }
+        .close-btn:hover { background: #2a2825; transform: rotate(90deg); }
+
+        /* ─── Root two-column grid ─── */
+        .root-grid {
+          display: grid;
+          grid-template-columns: 300px 1fr;
+          gap: 12px;
+          align-items: start;
+        }
+        .col-left, .col-right { display: flex; flex-direction: column; gap: 12px; }
+
+        /* Experience + Roadmap side-by-side */
+        .mid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* Projects mini-cards */
+        .proj-mini-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
+
+        /* Interest tiles */
+        .tile-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+
+        /* GH stats: desktop left col / mobile right col */
+        .gh-stats-left  { display: block; }
+        .gh-stats-right { display: none; }
+
+        /* ─── Panel internals ─── */
+        .panel-about-grid     { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+        .panel-interests-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+
+        .panel-proj-row {
+          display: grid;
+          grid-template-columns: 52px 1fr auto;
+          gap: 20px; padding: 22px 0;
+          border-bottom: 1px solid #1f1e1b;
+          align-items: start; transition: opacity 0.2s;
+        }
+        .panel-proj-links-col    { display: flex; flex-direction: column; gap: 9px; padding-top: 2px; min-width: 54px; }
+        .panel-proj-links-inline { display: none; margin-top: 10px; gap: 14px; }
+
+        .panel-exp-row {
+          display: grid; grid-template-columns: 88px 1fr;
+          gap: 20px; padding: 20px 0;
+          border-bottom: 1px solid #1f1e1b; transition: opacity 0.2s;
+        }
+
+        /* ════════════════════════════════════
+           LARGE TABLET  769px – 1100px
+        ════════════════════════════════════ */
+        @media (max-width: 1100px) {
+          .root-grid { grid-template-columns: 260px 1fr; gap: 10px; }
+        }
+
+        /* ════════════════════════════════════
+           TABLET  641px – 900px
+        ════════════════════════════════════ */
+        @media (max-width: 900px) {
+          .root-grid { grid-template-columns: 220px 1fr; gap: 10px; }
+          .proj-mini-grid { grid-template-columns: 1fr 1fr; }
+          .tile-grid { grid-template-columns: repeat(2,1fr); }
+          .mid-row { grid-template-columns: 1fr; gap: 10px; }
+        }
+
+        /* ════════════════════════════════════
+           MOBILE  ≤ 767px — single column
+        ════════════════════════════════════ */
+        @media (max-width: 767px) {
+          .root-grid  { grid-template-columns: 1fr; gap: 10px; }
+          .proj-mini-grid { grid-template-columns: 1fr 1fr; }
+          .tile-grid  { grid-template-columns: repeat(2,1fr); }
+
+          /* Swap GH stats to right column section on mobile */
+          .gh-stats-left  { display: none; }
+          .gh-stats-right { display: block; }
+
+          /* Panel goes full-screen */
+          .panel-drawer { width: 100vw; border-left: none; }
+
+          /* Panel inner layouts collapse to single column */
+          .panel-about-grid     { grid-template-columns: 1fr; gap: 24px; }
+          .panel-interests-grid { grid-template-columns: 1fr; gap: 20px; }
+
+          /* Project rows collapse */
+          .panel-proj-row { grid-template-columns: 1fr; gap: 10px; }
+          .panel-proj-num { display: none; }
+          .panel-proj-links-col    { display: none; }
+          .panel-proj-links-inline { display: flex; }
+
+          /* Experience rows collapse */
+          .panel-exp-row { grid-template-columns: 1fr; gap: 6px; }
+        }
+
+        /* ════════════════════════════════════
+           SMALL PHONE  ≤ 479px
+        ════════════════════════════════════ */
+        @media (max-width: 479px) {
+          .proj-mini-grid { grid-template-columns: 1fr; }
+          .tile-grid { grid-template-columns: repeat(2,1fr); }
+          .contact-buttons { flex-direction: column; align-items: stretch; }
+          .contact-btn { justify-content: center; }
         }
       `}</style>
 
-      {/* ── NAVBAR COMPONENT ── */}
       <Navbar navItems={navItems} activeNav={activeNav} />
 
-      {/* ── HERO ── */}
-      <section style={{
-        minHeight: "100vh", display: "flex", alignItems: "center",
-        background: "linear-gradient(145deg, #fff7ed 0%, #faf9f7 55%, #fef3c7 100%)",
-        padding: "0 24px", paddingTop: 80, position: "relative", overflow: "hidden"
-      }}>
-        <div style={{ position: "absolute", top: "15%", right: "3%", width: 500, height: 500, background: "radial-gradient(circle, rgba(251,146,60,0.12) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+      {/* Spacer below fixed navbar */}
+      <div style={{ paddingTop: 64, background: "#0a0908", borderBottom: "1px solid #1a1917" }} />
 
-        <div className="hero-grid" style={{ maxWidth: 1100, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
-          {/* Left text */}
-          <div style={{ animation: "fadeIn 0.8s ease both" }}>
-            <div className="hero-badge" style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#ea580c", fontWeight: 700, marginBottom: 20, display: "inline-block", background: "#fff7ed", padding: "6px 14px", borderRadius: 30, border: "1px solid #fed7aa" }}>
-              4th Year CS Student · Full-Stack Developer
-            </div>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(40px, 5vw, 72px)", fontWeight: 700, lineHeight: 1.06, letterSpacing: "-2px", marginBottom: 20, marginTop: 0 }}>
-              Hi, I&apos;m<br /><span style={{ color: "#ea580c", fontStyle: "italic" }}>Ralph Geo<br />Santos</span>
-            </h1>
-            <p style={{ fontSize: "clamp(15px, 1.6vw, 17px)", color: "#78716c", lineHeight: 1.8, marginBottom: 32, maxWidth: 420 }}>
-              Building scalable web experiences — from price trackers to music apps. Currently hunting for internship opportunities.
-            </p>
-            <div className="hero-socials" style={{ display: "flex", gap: 10, marginBottom: 28 }}>
-              {[
-                { href: "https://github.com/ralph12322", bg: "#1c1917", icon: <Github style={{ width: 18, height: 18, color: "#fff" }} /> },
-                { href: "https://www.linkedin.com/in/ralph-geo-santos-49226b281/", bg: "#0077b5", icon: <Linkedin style={{ width: 18, height: 18, color: "#fff" }} /> },
-                { href: "mailto:gjcshs.santos.ralphgeo@gmail.com", bg: "#ea580c", icon: <Mail style={{ width: 18, height: 18, color: "#fff" }} /> },
-              ].map((s, i) => (
-                <a
-                  key={i}
-                  href={s.href}
-                  style={{ padding: 11, background: s.bg, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", transition: "opacity 0.2s, transform 0.2s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >{s.icon}</a>
-              ))}
-            </div>
-            <div className="hero-btns" style={{ display: "flex", gap: 12 }}>
-              <button
-                onClick={() => open("projects")}
-                style={{ background: "#ea580c", color: "#fff", padding: "13px 28px", borderRadius: 8, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 24px rgba(234,88,12,0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(234,88,12,0.4)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(234,88,12,0.3)"; }}
-              >View Projects</button>
-              <button
-                onClick={() => open("about")}
-                style={{ background: "#fff", color: "#1c1917", padding: "13px 28px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", border: "2px solid #e7e5e4", fontFamily: "inherit", transition: "border-color 0.2s, transform 0.2s" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#ea580c"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e7e5e4"; e.currentTarget.style.transform = "translateY(0)"; }}
-              >About Me</button>
-            </div>
-          </div>
+      <main style={{ maxWidth: 1380, margin: "0 auto", padding: "14px clamp(10px,3vw,16px) 48px" }}>
+        <div className="root-grid">
 
-          {/* Right — Photo */}
-          <div style={{ display: "flex", justifyContent: "center", animation: "fadeIn 0.8s ease 0.2s both" }}>
-            <div className="hero-photo-wrap" style={{ position: "relative", width: 420, height: 500 }}>
-              <div style={{
-                width: "100%", height: "100%", borderRadius: 24, overflow: "hidden",
-                position: "relative", zIndex: 1,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 16px 40px rgba(0,0,0,0.12), 0 40px 80px rgba(0,0,0,0.1)"
-              }}>
-                <img
-                  src="./heroMe.jfif"
-                  alt="Ralph Geo Santos"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
-                />
-                <div style={{
-                  position: "absolute", bottom: 0, left: 0, right: 0, height: "30%",
-                  background: "linear-gradient(to top, rgba(250,249,247,0.25), transparent)",
-                  pointerEvents: "none"
-                }} />
-              </div>
-              <div className="hero-deco-br" style={{ position: "absolute", bottom: -16, right: -16, width: 110, height: 110, background: "linear-gradient(135deg, #ea580c, #f59e0b)", borderRadius: 18, zIndex: 0, opacity: 0.85 }} />
-              <div className="hero-deco-tl" style={{ position: "absolute", top: -12, left: -12, width: 76, height: 76, border: "2.5px solid #ea580c", borderRadius: 14, zIndex: 0, opacity: 0.5 }} />
-            </div>
-          </div>
-        </div>
+          {/* ══════════ LEFT COLUMN ══════════ */}
+          <div className="col-left">
 
-        <div style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)" }}>
-          <ChevronDown style={{ width: 26, height: 26, color: "#a8a29e", animation: "bounce 2s infinite" }} />
-        </div>
-      </section>
-
-      {/* ── EXPLORE CARDS ── */}
-      <section style={{ padding: "80px 24px", background: "#fff" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <Reveal>
-            <div style={{ marginBottom: 52 }}>
-              <div style={{ fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: "#a8a29e", fontWeight: 700, marginBottom: 12 }}>EXPLORE</div>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 700, letterSpacing: "-1px", margin: 0 }}>Get to Know Me</h2>
-            </div>
-          </Reveal>
-          <div className="cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-            {[
-              { label: "About", num: "01", desc: "Background & skills", action: () => open("about"), color: "#ea580c" },
-              { label: "Projects", num: "02", desc: "Things I've shipped", action: () => open("projects"), color: "#22c55e" },
-              { label: "Experience", num: "03", desc: "Journey & milestones", action: () => open("experience"), color: "#818cf8" },
-              { label: "Interests", num: "04", desc: "Beyond the code", action: () => open("interests"), color: "#ec4899" },
-            ].map((card, i) => (
-              <Reveal key={card.label} delay={i * 0.08}>
-                <button
-                  onClick={card.action}
-                  style={{ background: "#faf9f7", border: "1px solid #e7e5e4", borderRadius: 14, padding: "24px 20px", textAlign: "left", cursor: "pointer", width: "100%", fontFamily: "inherit", transition: "transform 0.25s, border-color 0.25s, box-shadow 0.25s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = card.color; e.currentTarget.style.boxShadow = `0 12px 36px ${card.color}14`; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "#e7e5e4"; e.currentTarget.style.boxShadow = "none"; }}
-                >
-                  <div style={{ fontSize: 11, color: "#d4d0cb", fontWeight: 700, marginBottom: 14, fontFamily: "monospace" }}>{card.num}</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>{card.label}</div>
-                  <div style={{ fontSize: 12, color: "#a8a29e", marginBottom: 20 }}>{card.desc}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: card.color }}>
-                    Open <ArrowUpRight style={{ width: 12, height: 12 }} />
-                  </div>
-                </button>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CONTACT ── */}
-      <section id="contact" style={{ padding: "80px 24px", background: "#0c0b09" }}>
-        <div style={{ maxWidth: 620, margin: "0 auto", textAlign: "center" }}>
-          <Reveal>
-            <div style={{ fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: "#57534e", fontWeight: 700, marginBottom: 18 }}>CONTACT</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(30px,5vw,52px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-1.5px", marginBottom: 18, lineHeight: 1.1 }}>
-              Let&apos;s build<br /><span style={{ color: "#f97316", fontStyle: "italic" }}>something together</span>
-            </h2>
-            <p style={{ fontSize: 15, color: "#57534e", lineHeight: 1.8, marginBottom: 44 }}>
-              Open to internship opportunities, collaborations, and interesting conversations.
-            </p>
-            <div className="contact-btns" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
-              <a
-                href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com&su=Hello&body=I%20would%20like%20to%20connect%20with%20you."
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#f97316", color: "#fff", padding: "13px 28px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none", fontFamily: "inherit" }}
-              >
-                <Mail style={{ width: 16, height: 16 }} /> Send a message
-              </a>
-              <a
-                href="https://www.facebook.com/ralph.santos.620659/"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "transparent", color: "#78716c", padding: "13px 28px", borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: "none", border: "1px solid #2a2825", fontFamily: "inherit" }}
-              >
-                <Facebook style={{ width: 16, height: 16 }} /> Facebook
-              </a>
-            </div>
-            <p style={{ color: "#3a3733", fontSize: 12, borderTop: "1px solid #1f1e1b", paddingTop: 28, margin: 0 }}>gjcshs.santos.ralphgeo@gmail.com</p>
-          </Reveal>
-        </div>
-      </section>
-
-      <footer style={{ background: "#080706", padding: "18px 24px", textAlign: "center" }}>
-        <p style={{ color: "#2a2825", fontSize: 12, margin: 0 }}>© 2025 Ralph Geo Santos</p>
-      </footer>
-
-      {/* ══ PANEL: ABOUT ══ */}
-      <Panel open={panel === "about"} onClose={close}>
-        <PanelHeader label="01 / About" title="Who I" italic="Am" onClose={close} />
-        <div className="panel-body-pad about-grid" style={{ flex: 1, overflowY: "auto", padding: "40px 52px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "start" }}>
-          <div>
-            <p style={{ fontSize: 17, color: "#a8a29e", lineHeight: 1.9, marginBottom: 32 }}>
-              I&apos;m a <span style={{ color: "#fafaf9", fontWeight: 600 }}>fourth-year CS student</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks are my comfort zone.
-            </p>
-            <p style={{ fontSize: 15, color: "#57534e", lineHeight: 1.85, marginBottom: 0 }}>
-              Currently looking for an internship where I can contribute to real engineering problems and keep growing as a developer.
-            </p>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(56px,8vw,96px)", fontWeight: 700, color: "#1a1916", lineHeight: 1, marginTop: 40, letterSpacing: "-4px", userSelect: "none" }}>
-              CS<span style={{ color: "#f97316" }}>.</span>
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {Object.entries(skills).map(([cat, items]) => (
-              <div key={cat}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#3a3733", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 14, height: 1, background: "#3a3733" }} /> {cat}
+            {/* Photo card */}
+            <Reveal>
+              <div style={{ ...card, position: "relative", aspectRatio: "3/3.8" }}>
+                <img src="./heroMe.jfif" alt="Ralph Geo Santos" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />
+                <div style={{ position: "absolute", top: 10, left: 10, right: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
+                  <LiveClock /><VisitorCount />
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                  {items.map((s) => (
-                    <span
-                      key={s}
-                      style={{ padding: "5px 13px", background: "#1a1916", borderRadius: 6, fontSize: 13, color: "#a8a29e", fontWeight: 500, border: "1px solid #2a2825", cursor: "default", transition: "color 0.2s, border-color 0.2s" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = "#fafaf9"; e.currentTarget.style.borderColor = "#f97316"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = "#a8a29e"; e.currentTarget.style.borderColor = "#2a2825"; }}
-                    >{s}</span>
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top,#131211,transparent)", pointerEvents: "none" }} />
+                <div style={{ position: "absolute", bottom: 14, left: 16, right: 16 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#2dd4bf", fontFamily: "'JetBrains Mono',monospace", marginBottom: 5, display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2dd4bf", animation: "pulse 2s infinite", flexShrink: 0 }} />
+                    Open to Internship
+                  </div>
+                  <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(18px,3vw,26px)", fontWeight: 700, color: "#fafaf9", lineHeight: 1.2, letterSpacing: "-0.5px" }}>
+                    Ralph Geo <span style={{ color: "#2dd4bf", fontStyle: "italic" }}>Santos</span>
+                  </h1>
+                  <div style={{ fontSize: 11, color: "#78716c", marginTop: 3 }}>4th Year CS · Full-Stack Developer</div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Blurb */}
+            <Reveal delay={0.04}>
+              <div style={{ ...card, padding: "13px 14px" }}>
+                <p style={{ fontSize: "clamp(11px,1.2vw,12px)", color: "#78716c", lineHeight: 1.75 }}>
+                  A Philippines-based <span style={{ color: "#2dd4bf", fontWeight: 600 }}>4th-year CS student</span> building scalable web apps — from price trackers to music platforms. MERN stack is my comfort zone.
+                </p>
+              </div>
+            </Reveal>
+
+            {/* Role badge */}
+            <Reveal delay={0.06}>
+              <div style={{ ...card, padding: "11px 13px", display: "flex", alignItems: "center", gap: 11 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: "#1a1916", border: "1px solid #2a2825", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Layers size={15} color="#2dd4bf" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#fafaf9", marginBottom: 1 }}>Fullstack Dev Intern</div>
+                  <div style={{ fontSize: 10, color: "#57534e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Jurisprudence Application Services</div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Skills */}
+            <SkillsBubble />
+
+            {/* GitHub stats — desktop/tablet only (left col) */}
+            <div className="gh-stats-left">
+              <Reveal delay={0.1}>
+                <div style={{ ...card, padding: "13px 15px" }}>
+                  <GitHubStats username="ralph12322" />
+                  <div style={{ background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 8, padding: "7px 5px" }}>
+                    <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+
+            {/* Socials */}
+            <Reveal delay={0.12}>
+              <div style={{ ...card, padding: "11px 13px", display: "flex", gap: 6 }}>
+                {[
+                  { href: "https://github.com/ralph12322", icon: <Github size={14} />, label: "GitHub" },
+                  { href: "https://www.linkedin.com/in/ralph-geo-santos-49226b281/", icon: <Linkedin size={14} />, label: "LinkedIn" },
+                  { href: "mailto:gjcshs.santos.ralphgeo@gmail.com", icon: <Mail size={14} />, label: "Email" },
+                  { href: "https://www.facebook.com/ralph.santos.620659/", icon: <Facebook size={14} />, label: "FB" },
+                  { href: "https://www.instagram.com/depapelpluma/?hl=en", icon: <Instagram size={14} />, label: "IG" },
+                ].map((s, i) => (
+                  <a key={i} href={s.href} target="_blank" rel="noopener noreferrer"
+                    style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "7px 3px", background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 8, color: "#57534e", fontSize: 8, fontWeight: 700, letterSpacing: 0.5, transition: "color 0.2s, border-color 0.2s", minWidth: 0 }}
+                    onMouseEnter={e => { e.currentTarget.style.color = "#2dd4bf"; e.currentTarget.style.borderColor = "#2dd4bf"; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = "#57534e"; e.currentTarget.style.borderColor = "#1a1917"; }}>
+                    {s.icon}
+                    <span style={{ textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{s.label}</span>
+                  </a>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+
+          {/* ══════════ RIGHT COLUMN ══════════ */}
+          <div className="col-right">
+
+            {/* Tagline */}
+            <Reveal>
+              <div style={{ ...card, padding: "clamp(14px,2vw,18px) clamp(14px,2vw,20px)" }}>
+                <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "#6b6663", lineHeight: 1.75 }}>
+                  Building at the intersection of <span style={{ color: "#2dd4bf", fontWeight: 600 }}>full-stack engineering</span>, clean UI, and <span style={{ color: "#5eead4", fontWeight: 600 }}>developer experience</span> — crafting apps that are fast, scalable, and genuinely useful.
+                </p>
+              </div>
+            </Reveal>
+
+            {/* Experience + Roadmap */}
+            <div className="mid-row">
+              <Reveal delay={0.03}>
+                <div style={{ ...card, padding: "15px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>Experience</div>
+                    <button onClick={() => open("experience")} style={{ fontSize: 9, color: "#2dd4bf", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>Full <ArrowUpRight size={9} /></button>
+                  </div>
+                  <div style={{ position: "relative" }}>
+                    <div style={{ position: "absolute", left: 6, top: 8, bottom: 8, width: 1, background: "#1e1d1b" }} />
+                    {[
+                      { period: "2026–Now", title: "Fullstack Dev Intern", co: "Jurisprudence App. Services", accent: "#2dd4bf" },
+                      { period: "2025", title: "Thesis Defense", co: "University · TrackTag", accent: "#99f6e4" },
+                      { period: "2022–26", title: "B.S. Computer Science", co: "University", accent: "#0d9488" },
+                    ].map((item, i) => (
+                      <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 1fr", gap: 9, marginBottom: i < 2 ? 13 : 0 }}>
+                        <div style={{ display: "flex", justifyContent: "center", paddingTop: 2 }}>
+                          <div style={{ width: 12, height: 12, borderRadius: "50%", background: item.accent, border: "2px solid #0a0908", zIndex: 1, boxShadow: `0 0 0 2px ${item.accent}25`, flexShrink: 0 }} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 9, color: "#3a3733", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>{item.period}</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "#fafaf9", marginBottom: 1 }}>{item.title}</div>
+                          <div style={{ fontSize: 10, color: item.accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.co}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+
+              <Reveal delay={0.05}>
+                <div style={{ ...card, padding: "15px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>Journey Roadmap</div>
+                    <span style={{ fontSize: 9, color: "#2a2825", fontStyle: "italic", fontFamily: "'Playfair Display',serif", flexShrink: 0 }}>Aspirational</span>
+                  </div>
+                  <div style={{ position: "relative", paddingLeft: 8 }}>
+                    <div style={{ position: "absolute", left: 8, top: 5, bottom: 5, width: 2, background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)", borderRadius: 2, opacity: 0.3 }} />
+                    {roadmap.map((step, i) => (
+                      <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 7, marginBottom: i < roadmap.length - 1 ? 9 : 0 }}>
+                        <div style={{ display: "flex", justifyContent: "center", paddingTop: 1, zIndex: 1 }}>
+                          {step.status === "done" ? (
+                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid #0a0908", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <CheckCircle2 size={6} color="#0a0908" strokeWidth={3} />
+                            </div>
+                          ) : step.status === "active" ? (
+                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid #0a0908", animation: "roadPulse 2s infinite", flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: "transparent", border: `2px solid ${step.accent}30`, flexShrink: 0 }} />
+                          )}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: "#2a2825" }}>{step.phase}</div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: step.status === "future" ? "#2a2825" : "#e7e5e4" }}>{step.label}</div>
+                          <div style={{ fontSize: 9, color: step.status === "future" ? "#1e1d1b" : "#3a3733" }}>{step.desc}</div>
+                          {step.status === "active" && (
+                            <div style={{ marginTop: 2, display: "inline-flex", alignItems: "center", gap: 3, background: step.accent + "18", padding: "1px 5px", borderRadius: 6, fontSize: 7, fontWeight: 700, color: step.accent, letterSpacing: 1 }}>
+                              <Zap size={6} style={{ animation: "pulse 1.5s infinite" }} /> NOW
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+
+            {/* GitHub contributions card */}
+            <Reveal delay={0.07}>
+              <div style={{ ...card, padding: "13px 15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>GitHub Contributions</div>
+                  <a href="https://github.com/ralph12322" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: "#2dd4bf", fontWeight: 700, display: "flex", alignItems: "center", gap: 3, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                    Live <ArrowUpRight size={9} />
+                  </a>
+                </div>
+                {/* GH stats — mobile only, rendered inside this card */}
+                <div className="gh-stats-right">
+                  <GitHubStats username="ralph12322" />
+                </div>
+                <div style={{ background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 7, padding: "8px 6px", marginBottom: 10, overflow: "hidden" }}>
+                  <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                  {[
+                    { icon: <GitPullRequest size={11} />, text: "merged PR #73 · tracktag", sub: "3 months ago", color: "#5eead4" },
+                    { icon: <GitCommit size={11} />, text: "pushed 4 commits · spotify-clone", sub: "1 month ago", color: "#14b8a6" },
+                    { icon: <Star size={11} />, text: "starred emovox", sub: "2 months ago", color: "#99f6e4" },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                      <div style={{ color: item.color, display: "flex", flexShrink: 0 }}>{item.icon}</div>
+                      <span style={{ fontSize: 11, color: "#57534e", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.text}</span>
+                      <span style={{ fontSize: 9, color: "#57534e", whiteSpace: "nowrap", marginLeft: 4, flexShrink: 0 }}>{item.sub}</span>
+                    </div>
                   ))}
                 </div>
               </div>
-            ))}
+            </Reveal>
+
+            {/* Projects mini-grid */}
+            <Reveal delay={0.09}>
+              <div style={{ ...card, padding: "13px 15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>Projects</div>
+                  <button onClick={() => open("projects")} style={{ fontSize: 9, color: "#2dd4bf", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                    All <ArrowUpRight size={9} />
+                  </button>
+                </div>
+                <div className="proj-mini-grid">
+                  {projects.map((p, i) => (
+                    <div key={i}
+                      style={{ background: "#0f0e0c", border: "1px solid #1a1917", borderTop: `2px solid ${p.accent}`, borderRadius: 9, padding: "12px", transition: "transform 0.2s, border-color 0.2s", cursor: "default" }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.borderColor = p.accent; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLDivElement).style.borderColor = "#1a1917"; }}>
+                      <div style={{ fontSize: 8, letterSpacing: 2, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 4, fontFamily: "'JetBrains Mono',monospace" }}>{p.tag}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#fafaf9", marginBottom: 5, fontFamily: "'Playfair Display',serif" }}>{p.title}</div>
+                      <div style={{ fontSize: 10, color: "#3a3733", lineHeight: 1.5, marginBottom: 8 }}>{p.description.slice(0, 85)}…</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 9 }}>
+                        {p.tech.slice(0, 3).map(t => <span key={t} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 8, fontFamily: "'JetBrains Mono',monospace", background: "#1a1916", color: "#3a3733", border: "1px solid #2a2825" }}>{t}</span>)}
+                      </div>
+                      <div style={{ display: "flex", gap: 12 }}>
+                        {p.github !== "#" && (
+                          <a href={p.github} target="_blank" rel="noopener noreferrer"
+                            style={{ fontSize: 10, color: "#57534e", display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "color 0.2s" }}
+                            onMouseEnter={e => e.currentTarget.style.color = "#fafaf9"}
+                            onMouseLeave={e => e.currentTarget.style.color = "#57534e"}>
+                            <Github size={10} /> Code
+                          </a>
+                        )}
+                        <a href={p.demo} target="_blank" rel="noopener noreferrer"
+                          style={{ fontSize: 10, color: p.accent, display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "opacity 0.2s" }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
+                          onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                          <ExternalLink size={10} /> Demo
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Interests tiles */}
+            <Reveal delay={0.11}>
+              <div style={{ ...card, padding: "13px 15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>The Human Section</div>
+                  <button onClick={() => open("interests")} style={{ fontSize: 9, color: "#2dd4bf", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                    Interests &amp; Fun <ArrowUpRight size={9} />
+                  </button>
+                </div>
+                <div className="tile-grid">
+                  {interestTiles.map((tile, i) => (
+                    <div key={i} onClick={() => open("interests")}
+                      style={{ background: hoveredTile === i ? tile.bg : "#0f0e0c", border: `1px solid ${hoveredTile === i ? tile.color + "45" : "#1a1917"}`, borderRadius: 9, padding: "11px 9px", cursor: "pointer", transition: "all 0.2s", transform: hoveredTile === i ? "translateY(-2px)" : "translateY(0)" }}
+                      onMouseEnter={() => setHoveredTile(i)} onMouseLeave={() => setHoveredTile(null)}>
+                      <div style={{ fontSize: 17, marginBottom: 5, color: hoveredTile === i ? tile.color : "#57534e", transition: "color 0.2s" }}>{tile.icon}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: hoveredTile === i ? tile.color : "#78716c", marginBottom: 2, transition: "color 0.2s" }}>{tile.label}</div>
+                      <div style={{ fontSize: 8, color: "#2a2825", lineHeight: 1.4 }}>{tile.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </main>
+
+      {/* ══════════ CONTACT ══════════ */}
+      <section id="contact" style={{ padding: "clamp(36px,6vw,56px) clamp(16px,4vw,20px)", background: "#0c0b09", borderTop: "1px solid #1a1917" }}>
+        <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
+          <Reveal>
+            <div style={{ fontSize: 9, letterSpacing: 4, textTransform: "uppercase", color: "#57534e", fontWeight: 700, marginBottom: 12 }}>CONTACT</div>
+            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,6vw,44px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-1.5px", marginBottom: 12, lineHeight: 1.1 }}>
+              Let&apos;s build<br /><span style={{ color: "#2dd4bf", fontStyle: "italic" }}>something together</span>
+            </h2>
+            <p style={{ fontSize: "clamp(12px,1.5vw,13px)", color: "#57534e", lineHeight: 1.8, marginBottom: 28 }}>Open to internship opportunities, collaborations, and interesting conversations.</p>
+            <div className="contact-buttons" style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24 }}>
+              <a href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
+                className="contact-btn"
+                style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#2dd4bf", color: "#0a0908", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
+                <Mail size={13} /> Send a message
+              </a>
+              <a href="https://www.facebook.com/ralph.santos.620659/"
+                className="contact-btn"
+                style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "transparent", color: "#78716c", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "1px solid #2a2825", fontFamily: "inherit" }}>
+                <Facebook size={13} /> Facebook
+              </a>
+            </div>
+            <p style={{ color: "#3a3733", fontSize: 11, borderTop: "1px solid #1a1917", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
+          </Reveal>
+        </div>
+      </section>
+
+      <footer style={{ background: "#080706", padding: "13px 24px", textAlign: "center", borderTop: "1px solid #1a1916" }}>
+        <p style={{ color: "#2a2825", fontSize: 11 }}>© 2025 Ralph Geo Santos</p>
+      </footer>
+
+      {/* ══════════ PANELS ══════════ */}
+
+      {/* — About — */}
+      <Panel open={panel === "about"} onClose={close}>
+        <PanelHeader label="01 / About" title="Who I" italic="Am" onClose={close} />
+        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(16px,3vw,44px) clamp(14px,4vw,48px)" }}>
+          <div className="panel-about-grid">
+            <div>
+              <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "#a8a29e", lineHeight: 1.9, marginBottom: 20 }}>
+                I&apos;m a <span style={{ color: "#fafaf9", fontWeight: 600 }}>fourth-year CS student</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks.
+              </p>
+              <p style={{ fontSize: "clamp(11px,1.2vw,14px)", color: "#57534e", lineHeight: 1.85 }}>
+                Currently looking for an internship where I can contribute to real engineering problems and keep growing as a developer.
+              </p>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,7vw,88px)", fontWeight: 700, color: "#1a1916", lineHeight: 1, marginTop: 28, letterSpacing: "-4px", userSelect: "none" }}>CS<span style={{ color: "#2dd4bf" }}>.</span></div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {Object.entries(skills).map(([cat, items]) => (
+                <div key={cat}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#3a3733", marginBottom: 9, display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 12, height: 1, background: "#3a3733", flexShrink: 0 }} />{cat}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {items.map(s => (
+                      <span key={s.label}
+                        style={{ padding: "5px 11px", background: "#1a1916", borderRadius: 5, fontSize: 12, color: "#a8a29e", fontWeight: 500, border: "1px solid #2a2825", cursor: "default", display: "flex", alignItems: "center", gap: 5, transition: "color 0.2s, border-color 0.2s" }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "#2dd4bf"; e.currentTarget.style.borderColor = "#2dd4bf"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "#a8a29e"; e.currentTarget.style.borderColor = "#2a2825"; }}>
+                        {s.icon}{s.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </Panel>
 
-      {/* ══ PANEL: PROJECTS ══ */}
+      {/* — Projects — */}
       <Panel open={panel === "projects"} onClose={close}>
         <PanelHeader label="02 / Projects" title="Things I've" italic="Shipped" onClose={close} />
-        <div className="panel-body-pad" style={{ flex: 1, overflowY: "auto", padding: "40px 52px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
           {projects.map((p, i) => (
-            <div
-              key={i}
-              className="project-row"
-              style={{ display: "grid", gridTemplateColumns: "64px 1fr auto", gap: 28, padding: "28px 0", borderBottom: "1px solid #1f1e1b", alignItems: "start", transition: "opacity 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.65")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              <div className="project-row-num" style={{ fontFamily: "monospace", fontSize: 12, color: "#3a3733", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 6 }}>{p.tag}</div>
-                <h3 style={{ fontSize: "clamp(18px,2.5vw,24px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-0.5px", margin: "0 0 10px", fontFamily: "'Playfair Display', serif" }}>{p.title}</h3>
-                <p style={{ fontSize: 14, color: "#57534e", lineHeight: 1.75, margin: "0 0 14px", maxWidth: 500 }}>{p.description}</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {p.tech.map((t) => (
-                    <span key={t} style={{ padding: "3px 9px", borderRadius: 4, fontSize: 11, fontWeight: 600, fontFamily: "monospace", background: "#1a1916", color: "#57534e", border: "1px solid #2a2825" }}>{t}</span>
-                  ))}
+            <div key={i} className="panel-proj-row"
+              onMouseEnter={e => (e.currentTarget.style.opacity = "0.65")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
+              <div className="panel-proj-num" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#2a2825", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 5 }}>{p.tag}</div>
+                <h3 style={{ fontSize: "clamp(14px,2.5vw,22px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-0.5px", margin: "0 0 9px", fontFamily: "'Playfair Display',serif" }}>{p.title}</h3>
+                <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "#57534e", lineHeight: 1.7, margin: "0 0 12px", maxWidth: 480 }}>{p.description}</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {p.tech.map(t => <span key={t} style={{ padding: "3px 8px", borderRadius: 4, fontSize: 10, fontWeight: 600, fontFamily: "'JetBrains Mono',monospace", background: "#1a1916", color: "#57534e", border: "1px solid #2a2825" }}>{t}</span>)}
+                </div>
+                {/* Links shown inline on mobile */}
+                <div className="panel-proj-links-inline">
+                  {p.github !== "#" && <a href={p.github} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#57534e", fontWeight: 600 }}><Github size={12} /> Code</a>}
+                  <a href={p.demo} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600 }}><ExternalLink size={12} /> Demo</a>
                 </div>
               </div>
-              <div className="project-row-links" style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 2 }}>
+              {/* Links shown in right col on desktop */}
+              <div className="panel-proj-links-col">
                 {p.github !== "#" && (
-                  <a
-                    href={p.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#57534e", textDecoration: "none", fontWeight: 600, whiteSpace: "nowrap", transition: "color 0.2s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#fafaf9")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#57534e")}
-                  >
-                    <Github style={{ width: 13, height: 13 }} /> Code
+                  <a href={p.github} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#57534e", fontWeight: 600, transition: "color 0.2s", whiteSpace: "nowrap" }}
+                    onMouseEnter={e => e.currentTarget.style.color = "#fafaf9"}
+                    onMouseLeave={e => e.currentTarget.style.color = "#57534e"}>
+                    <Github size={12} /> Code
                   </a>
                 )}
-                <a
-                  href={p.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: p.accent, textDecoration: "none", fontWeight: 600, whiteSpace: "nowrap", transition: "opacity 0.2s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-                >
-                  <ExternalLink style={{ width: 13, height: 13 }} /> Demo
+                <a href={p.demo} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600, transition: "opacity 0.2s", whiteSpace: "nowrap" }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                  <ExternalLink size={12} /> Demo
                 </a>
               </div>
             </div>
@@ -538,77 +694,60 @@ export default function Portfolio() {
         </div>
       </Panel>
 
-      {/* ══ PANEL: EXPERIENCE ══ */}
+      {/* — Experience — */}
       <Panel open={panel === "experience"} onClose={close}>
         <PanelHeader label="03 / Experience" title="The" italic="Journey" onClose={close} />
-        <div className="panel-body-pad" style={{ flex: 1, overflowY: "auto", padding: "40px 52px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
           {timeline.map((item, i) => (
-            <div
-              key={i}
-              className="exp-row"
-              style={{ display: "grid", gridTemplateColumns: "96px 1fr", gap: 28, padding: "28px 0", borderBottom: "1px solid #1f1e1b", transition: "opacity 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.65")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              <div style={{ paddingTop: 3 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "monospace", padding: "4px 10px", background: `${item.accent}18`, color: item.accent, borderRadius: 5, border: `1px solid ${item.accent}30` }}>{item.year}</span>
+            <div key={i} className="panel-exp-row"
+              onMouseEnter={e => e.currentTarget.style.opacity = "0.65"}
+              onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+              <div style={{ paddingTop: 3, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace", padding: "4px 9px", background: `${item.accent}18`, color: item.accent, borderRadius: 4, border: `1px solid ${item.accent}30`, display: "inline-block" }}>{item.year}</span>
               </div>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: 3, textTransform: "uppercase", color: "#3a3733", fontWeight: 700, marginBottom: 6 }}>{item.company}</div>
-                <h3 style={{ fontSize: "clamp(16px,2vw,20px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-0.3px", margin: "0 0 8px", fontFamily: "'Playfair Display', serif" }}>{item.title}</h3>
-                <p style={{ fontSize: 14, color: "#57534e", lineHeight: 1.75, margin: 0, maxWidth: 500 }}>{item.description}</p>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: "#3a3733", fontWeight: 700, marginBottom: 5 }}>{item.company}</div>
+                <h3 style={{ fontSize: "clamp(13px,2vw,19px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-0.3px", margin: "0 0 7px", fontFamily: "'Playfair Display',serif" }}>{item.title}</h3>
+                <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "#57534e", lineHeight: 1.7, maxWidth: 480 }}>{item.description}</p>
               </div>
             </div>
           ))}
         </div>
       </Panel>
-      <MusicPlayer />
 
-      {/* ══ PANEL: INTERESTS ══ */}
+      {/* — Interests — */}
       <Panel open={panel === "interests"} onClose={close}>
         <PanelHeader label="04 / Interests" title="Beyond the" italic="Code" onClose={close} />
-        <div style={{ display: "flex", padding: "0 clamp(20px,4vw,52px)", borderBottom: "1px solid #1f1e1b", flexShrink: 0, overflowX: "auto" }}>
+        {/* Tab bar */}
+        <div style={{ display: "flex", padding: "0 clamp(14px,4vw,48px)", borderBottom: "1px solid #1f1e1b", flexShrink: 0, overflowX: "auto", scrollbarWidth: "none" }}>
           {interests.map((b, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveInterest(i)}
-              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 600, padding: "14px 20px", color: activeInterest === i ? "#fafaf9" : "#3a3733", borderBottom: activeInterest === i ? `2px solid ${b.accent}` : "2px solid transparent", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}
-            >
-              <span style={{ color: activeInterest === i ? b.accent : "#3a3733", transition: "color 0.2s", display: "flex" }}>{b.icon}</span>
-              {b.category}
+            <button key={i} onClick={() => setActiveInterest(i)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "clamp(11px,1.3vw,12px)", fontWeight: 600, padding: "12px clamp(10px,2vw,16px)", color: activeInterest === i ? "#fafaf9" : "#3a3733", borderBottom: activeInterest === i ? `2px solid ${b.accent}` : "2px solid transparent", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
+              <span style={{ color: activeInterest === i ? b.accent : "#3a3733", transition: "color 0.2s", display: "flex" }}>{b.icon}</span>{b.category}
             </button>
           ))}
         </div>
-        <div className="panel-body-pad" style={{ flex: 1, overflowY: "auto", padding: "40px 52px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
           {interests.map((b, i) => (
-            <div
-              key={i}
-              className="interests-grid"
-              style={{ display: activeInterest === i ? "grid" : "none", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "start" }}
-            >
+            <div key={i} className="panel-interests-grid" style={{ display: activeInterest === i ? "grid" : "none" }}>
               <div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 24, color: b.accent }}>
-                  {b.icon}
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase" }}>{b.category}</span>
-                </div>
-                <p style={{ fontSize: 17, color: "#a8a29e", lineHeight: 1.85 }}>{b.description}</p>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(56px,8vw,88px)", fontWeight: 700, color: "#141310", lineHeight: 1, marginTop: 40, letterSpacing: "-3px", userSelect: "none" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 9, marginBottom: 18, color: b.accent }}>{b.icon}<span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase" }}>{b.category}</span></div>
+                <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "#a8a29e", lineHeight: 1.85 }}>{b.description}</p>
+                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,7vw,80px)", fontWeight: 700, color: "#141310", lineHeight: 1, marginTop: 28, letterSpacing: "-3px", userSelect: "none" }}>
                   {b.category.split(" ")[0]}<span style={{ color: b.accent }}>.</span>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div>
                 {b.items.map((item, j) => (
-                  <div
-                    key={j}
-                    style={{ padding: "18px 0", borderBottom: "1px solid #1f1e1b", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "opacity 0.2s", cursor: "default" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.55")}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-                  >
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#e7e5e4", marginBottom: 3 }}>{item.label}</div>
-                      <div style={{ fontSize: 12, color: "#3a3733" }}>{item.sub}</div>
+                  <div key={j}
+                    style={{ padding: "14px 0", borderBottom: "1px solid #1f1e1b", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, cursor: "default", transition: "opacity 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = "0.55"}
+                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#e7e5e4", marginBottom: 3 }}>{item.label}</div>
+                      <div style={{ fontSize: 11, color: "#3a3733" }}>{item.sub}</div>
                     </div>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: b.accent, flexShrink: 0 }} />
+                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: b.accent, flexShrink: 0 }} />
                   </div>
                 ))}
               </div>
@@ -616,6 +755,8 @@ export default function Portfolio() {
           ))}
         </div>
       </Panel>
+
+      <MusicPlayer />
     </div>
   );
 }

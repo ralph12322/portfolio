@@ -1,39 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ─── Reset Tailwind's body overrides ─── */
+@layer base {
+  body {
+    background: #0a0908 !important;
+    color: #e7e5e4 !important;
+    font-family: 'Sora', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    scroll-behavior: smooth;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
+/* ─── Animations used across the site ─── */
 @keyframes typing {
   from { width: 0 }
-  to { width: 100% }
+  to   { width: 100% }
 }
 
 @keyframes blink {
   50% { border-color: transparent }
 }
 
+@keyframes livePulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+@keyframes rippleOut {
+  0%   { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+@keyframes roadPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(45,212,191,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(45,212,191,0); }
+}
+
+/* ─── Utility classes ─── */
 .animate-typing {
   overflow: hidden;
   border-right: 3px solid;
@@ -41,11 +64,11 @@ body {
   animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .animate-fade-in {
   animation: fade-in 1s ease-out;
 }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar              { width: 4px; }
+::-webkit-scrollbar-track        { background: #0a0908; }
+::-webkit-scrollbar-thumb        { background: #2a2825; border-radius: 2px; }

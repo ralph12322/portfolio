@@ -10,6 +10,10 @@ const nextConfig: import('next').NextConfig = {
         source: '/music/(.*).mp4',
         headers: [{ key: 'Content-Type', value: 'video/mp4' }],
       },
+      {
+        source: '/api/(.*)',
+        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
+      },
     ];
   },
 };
