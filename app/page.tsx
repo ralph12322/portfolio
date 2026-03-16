@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import {
   Github, Linkedin, Mail, Facebook, ExternalLink,
   Music, Film, Gamepad2, X, ArrowUpRight, GitCommit,
@@ -17,22 +17,23 @@ interface Interest { category: string; icon: ReactNode; accent: string; descript
 interface PanelProps { open: boolean; onClose: () => void; children: ReactNode; }
 interface PanelHeaderProps { label: string; title: string; italic?: string; onClose: () => void; }
 
-function useInView(threshold = 0.1): [React.RefObject<HTMLDivElement | null>, boolean] {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+/* ── Responsive hook ─────────────────────────────────────── */
+function useBreakpoint() {
+  // Always start with desktop (matches SSR default), switch after mount
+  const [w, setW] = useState(1200);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    // rootMargin pulls the trigger zone 60px above the bottom edge,
-    // so elements reveal before they fully scroll into view — fixes
-    // the mobile single-column reflow where items start below the fold.
-    // threshold:0 means fire as soon as even 1px is visible.
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setVisible(true); },
-      { threshold: 0, rootMargin: "0px 0px 0px 0px" }
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []); // no dep on threshold — we use fixed 0 for reliability
-  return [ref, visible];
+    setMounted(true);
+    setW(window.innerWidth);
+    const fn = () => setW(window.innerWidth);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  // Before mount, always return desktop so server HTML matches
+  if (!mounted) return { isMobile: false, isTablet: false, isDesktop: true, w: 1200 };
+  return { isMobile: w < 768, isTablet: w >= 768 && w < 900, isDesktop: w >= 900, w };
 }
 
 function GitHubStats({ username }: { username: string }) {
@@ -49,7 +50,7 @@ function GitHubStats({ username }: { username: string }) {
   }, [username]);
   return (
     <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-      {[{ label: "REPOS", value: repos }, { label: "CONTRIBUTIONS", value: contributions }].map((s, i) => (
+      {[{ label: "PUBLIC REPOS", value: repos }, { label: "CONTRIBUTIONS", value: contributions }].map((s, i) => (
         <div key={i} style={{ flex: 1, background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 8, padding: "9px 11px" }}>
           <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: "#3a3733", marginBottom: 3, fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#2dd4bf", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-1px" }}>{s.value}</div>
@@ -59,13 +60,8 @@ function GitHubStats({ username }: { username: string }) {
   );
 }
 
-function Reveal({ children, delay = 0, style = {} }: { children: ReactNode; delay?: number; style?: React.CSSProperties }) {
-  const [ref, visible] = useInView();
-  return (
-    <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(18px)", transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s`, ...style }}>
-      {children}
-    </div>
-  );
+function Reveal({ children, style = {} }: { children: ReactNode; delay?: number; style?: React.CSSProperties }) {
+  return <div style={{ minWidth: 0, ...style }}>{children}</div>;
 }
 
 function Panel({ open, onClose, children }: PanelProps) {
@@ -150,7 +146,7 @@ const roadmap = [
   { phase: "2023", label: "Foundation", desc: "MERN stack mastery", status: "done", accent: "#14b8a6" },
   { phase: "2024", label: "Shipped Projects", desc: "EmoVOX & full-stack apps", status: "done", accent: "#5eead4" },
   { phase: "2025", label: "Impact", desc: "Thesis + Internship ready", status: "done", accent: "#99f6e4" },
-  { phase: "2026+", label: "Growth", desc: "Next.js, TypeScript, DevOps", status: "active", accent: "#2dd4bf" },
+  { phase: "2026+", label: "Growth", desc: "Next.js, TypeScript, DevOps, Internship", status: "active", accent: "#2dd4bf" },
   { phase: "Future", label: "Vision", desc: "Senior Engineer & Mentor", status: "future", accent: "#0d9488" },
 ];
 
@@ -168,6 +164,7 @@ export default function Portfolio() {
   const [activeInterest, setActiveInterest] = useState(0);
   const [activeNav, setActiveNav] = useState<string | null>(null);
   const [hoveredTile, setHoveredTile] = useState<number | null>(null);
+  const { isMobile, isTablet, isDesktop } = useBreakpoint();
 
   const scrollTo = (id: string) => { document.querySelector(id)?.scrollIntoView({ behavior: "smooth" }); setActiveNav("Contact"); };
   const open = (name: string) => { setPanel(name); setActiveNav(name.charAt(0).toUpperCase() + name.slice(1)); };
@@ -181,177 +178,146 @@ export default function Portfolio() {
     { label: "Contact", action: () => scrollTo("#contact") },
   ];
 
+  /* ── Derived layout values ── */
+
+  // Root grid: 1 col on mobile, 2 col on tablet/desktop
+  const rootGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : isTablet ? "220px 1fr" : "300px 1fr",
+    gap: isMobile ? 10 : 12,
+    alignItems: "start",
+  };
+
+  // Left column: sticky on desktop only
+  const colLeftStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    minWidth: 0,
+    width: "100%",
+    ...(isDesktop ? {
+      position: "sticky",
+      top: 78,
+      maxHeight: "calc(100vh - 92px)",
+      overflowY: "auto",
+      scrollbarWidth: "none" as const,
+    } : {
+      position: "static",
+      maxHeight: "none",
+      overflowY: "visible",
+    }),
+  };
+
+  // Photo card: fixed aspect on desktop, auto height on mobile
+  const photoCardStyle: React.CSSProperties = {
+    ...card,
+    position: "relative",
+    ...(isMobile
+      ? { height: "56vw", minHeight: 220, maxHeight: 340 }
+      : { aspectRatio: "3/3.8" }
+    ),
+  };
+
+  // mid-row: 2 cols on desktop, 1 col on mobile/tablet
+  const midRowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile || isTablet ? "1fr" : "1fr 1fr",
+    gap: 12,
+  };
+
+  // proj-mini-grid: 3 cols desktop, 2 cols tablet, 1 col mobile
+  const projMiniGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)",
+    gap: 10,
+  };
+
+  // tile-grid: always 2 cols (4 tiles)
+  const tileGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: 8,
+  };
+
+  // Panel internals
+  const panelAboutGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+    gap: isMobile ? 24 : 40,
+    alignItems: "start",
+  };
+
+  const panelInterestsGridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+    gap: isMobile ? 20 : 40,
+    alignItems: "start",
+  };
+
+  const panelProjRowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "52px 1fr auto",
+    gap: isMobile ? 10 : 20,
+    padding: "22px 0",
+    borderBottom: "1px solid #1f1e1b",
+    alignItems: "start",
+    transition: "opacity 0.2s",
+  };
+
+  const panelExpRowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "88px 1fr",
+    gap: isMobile ? 6 : 20,
+    padding: "20px 0",
+    borderBottom: "1px solid #1f1e1b",
+    transition: "opacity 0.2s",
+  };
+
   return (
-    <div style={{ fontFamily: "'Sora', sans-serif", background: "#0a0908", color: "#e7e5e4", minHeight: "100vh" }}>
+    <div style={{ fontFamily: "'Sora', sans-serif", background: "#0a0908", color: "#e7e5e4", minHeight: "100vh", overflowX: "hidden" }}>
       <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-
-      <style>{`
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-        @keyframes roadPulse { 0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,0.4)} 50%{box-shadow:0 0 0 8px rgba(45,212,191,0)} }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#0a0908} ::-webkit-scrollbar-thumb{background:#2a2825;border-radius:2px}
-        a { text-decoration: none; }
-
-        /* ─── Panel drawer ─── */
-        .panel-drawer {
-          position: fixed; top: 0; right: 0; bottom: 0; z-index: 200;
-          width: min(96vw, 1100px);
-          background: #0d0c0a;
-          transition: transform 0.5s cubic-bezier(0.77,0,0.175,1);
-          display: flex; flex-direction: column; overflow: hidden;
-          border-left: 1px solid #1f1e1b;
-        }
-        .close-btn {
-          background: #1a1916; border: 1px solid #2a2825; cursor: pointer;
-          border-radius: 50%; width: 40px; height: 40px; min-width: 40px; flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-          margin-left: 12px; transition: background 0.2s, transform 0.3s;
-        }
-        .close-btn:hover { background: #2a2825; transform: rotate(90deg); }
-
-        /* ─── Root two-column grid ─── */
-        .root-grid {
-          display: grid;
-          grid-template-columns: 300px 1fr;
-          gap: 12px;
-          align-items: start;
-        }
-        .col-left, .col-right { display: flex; flex-direction: column; gap: 12px; }
-
-        /* Experience + Roadmap side-by-side */
-        .mid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-        /* Projects mini-cards */
-        .proj-mini-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
-
-        /* Interest tiles */
-        .tile-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
-
-        /* GH stats: desktop left col / mobile right col */
-        .gh-stats-left  { display: block; }
-        .gh-stats-right { display: none; }
-
-        /* ─── Panel internals ─── */
-        .panel-about-grid     { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-        .panel-interests-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
-
-        .panel-proj-row {
-          display: grid;
-          grid-template-columns: 52px 1fr auto;
-          gap: 20px; padding: 22px 0;
-          border-bottom: 1px solid #1f1e1b;
-          align-items: start; transition: opacity 0.2s;
-        }
-        .panel-proj-links-col    { display: flex; flex-direction: column; gap: 9px; padding-top: 2px; min-width: 54px; }
-        .panel-proj-links-inline { display: none; margin-top: 10px; gap: 14px; }
-
-        .panel-exp-row {
-          display: grid; grid-template-columns: 88px 1fr;
-          gap: 20px; padding: 20px 0;
-          border-bottom: 1px solid #1f1e1b; transition: opacity 0.2s;
-        }
-
-        /* ════════════════════════════════════
-           LARGE TABLET  769px – 1100px
-        ════════════════════════════════════ */
-        @media (max-width: 1100px) {
-          .root-grid { grid-template-columns: 260px 1fr; gap: 10px; }
-        }
-
-        /* ════════════════════════════════════
-           TABLET  641px – 900px
-        ════════════════════════════════════ */
-        @media (max-width: 900px) {
-          .root-grid { grid-template-columns: 220px 1fr; gap: 10px; }
-          .proj-mini-grid { grid-template-columns: 1fr 1fr; }
-          .tile-grid { grid-template-columns: repeat(2,1fr); }
-          .mid-row { grid-template-columns: 1fr; gap: 10px; }
-        }
-
-        /* ════════════════════════════════════
-           MOBILE  ≤ 767px — single column
-        ════════════════════════════════════ */
-        @media (max-width: 767px) {
-          .root-grid  { grid-template-columns: 1fr; gap: 10px; }
-          .proj-mini-grid { grid-template-columns: 1fr 1fr; }
-          .tile-grid  { grid-template-columns: repeat(2,1fr); }
-
-          /* Swap GH stats to right column section on mobile */
-          .gh-stats-left  { display: none; }
-          .gh-stats-right { display: block; }
-
-          /* Panel goes full-screen */
-          .panel-drawer { width: 100vw; border-left: none; }
-
-          /* Panel inner layouts collapse to single column */
-          .panel-about-grid     { grid-template-columns: 1fr; gap: 24px; }
-          .panel-interests-grid { grid-template-columns: 1fr; gap: 20px; }
-
-          /* Project rows collapse */
-          .panel-proj-row { grid-template-columns: 1fr; gap: 10px; }
-          .panel-proj-num { display: none; }
-          .panel-proj-links-col    { display: none; }
-          .panel-proj-links-inline { display: flex; }
-
-          /* Experience rows collapse */
-          .panel-exp-row { grid-template-columns: 1fr; gap: 6px; }
-        }
-
-        /* ════════════════════════════════════
-           SMALL PHONE  ≤ 479px
-        ════════════════════════════════════ */
-        @media (max-width: 479px) {
-          .proj-mini-grid { grid-template-columns: 1fr; }
-          .tile-grid { grid-template-columns: repeat(2,1fr); }
-          .contact-buttons { flex-direction: column; align-items: stretch; }
-          .contact-btn { justify-content: center; }
-        }
-      `}</style>
 
       <Navbar navItems={navItems} activeNav={activeNav} />
 
       {/* Spacer below fixed navbar */}
       <div style={{ paddingTop: 64, background: "#0a0908", borderBottom: "1px solid #1a1917" }} />
 
-      <main style={{ maxWidth: 1380, margin: "0 auto", padding: "14px clamp(10px,3vw,16px) 48px" }}>
-        <div className="root-grid">
+      <main style={{ maxWidth: 1380, margin: "0 auto", padding: isMobile ? "12px 10px 48px" : "14px clamp(10px,3vw,16px) 48px" }}>
+        <div style={rootGridStyle}>
 
           {/* ══════════ LEFT COLUMN ══════════ */}
-          <div className="col-left">
+          <div style={colLeftStyle}>
 
             {/* Photo card */}
-            <Reveal>
-              <div style={{ ...card, position: "relative", aspectRatio: "3/3.8" }}>
-                <img src="./heroMe.jfif" alt="Ralph Geo Santos" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />
-                <div style={{ position: "absolute", top: 10, left: 10, right: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
-                  <LiveClock /><VisitorCount />
-                </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top,#131211,transparent)", pointerEvents: "none" }} />
-                <div style={{ position: "absolute", bottom: 14, left: 16, right: 16 }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#2dd4bf", fontFamily: "'JetBrains Mono',monospace", marginBottom: 5, display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2dd4bf", animation: "pulse 2s infinite", flexShrink: 0 }} />
-                    Open to Internship
-                  </div>
-                  <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(18px,3vw,26px)", fontWeight: 700, color: "#fafaf9", lineHeight: 1.2, letterSpacing: "-0.5px" }}>
-                    Ralph Geo <span style={{ color: "#2dd4bf", fontStyle: "italic" }}>Santos</span>
-                  </h1>
-                  <div style={{ fontSize: 11, color: "#78716c", marginTop: 3 }}>4th Year CS · Full-Stack Developer</div>
-                </div>
+            <div style={photoCardStyle}>
+              <img src="./heroMe.jfif" alt="Ralph Geo Santos" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />
+              <div style={{ position: "absolute", top: 10, left: 10, right: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
+                <LiveClock /><VisitorCount />
               </div>
-            </Reveal>
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top,#131211,transparent)", pointerEvents: "none" }} />
+              <div style={{ position: "absolute", bottom: 14, left: 16, right: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#2dd4bf", fontFamily: "'JetBrains Mono',monospace", marginBottom: 5, display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2dd4bf", animation: "pulse 2s infinite", flexShrink: 0 }} />
+                  Open to Opportunities
+                </div>
+                <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(18px,3vw,26px)", fontWeight: 700, color: "#fafaf9", lineHeight: 1.2, letterSpacing: "-0.5px" }}>
+                  Ralph Geo <span style={{ color: "#2dd4bf", fontStyle: "italic" }}>Santos</span>
+                </h1>
+                <div style={{ fontSize: 11, color: "#78716c", marginTop: 3 }}>4th Year CS · Full-Stack Developer</div>
+              </div>
+            </div>
 
             {/* Blurb */}
-            <Reveal delay={0.04}>
+            <Reveal>
               <div style={{ ...card, padding: "13px 14px" }}>
-                <p style={{ fontSize: "clamp(11px,1.2vw,12px)", color: "#78716c", lineHeight: 1.75 }}>
+                <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "#78716c", lineHeight: 1.75 }}>
                   A Philippines-based <span style={{ color: "#2dd4bf", fontWeight: 600 }}>4th-year CS student</span> building scalable web apps — from price trackers to music platforms. MERN stack is my comfort zone.
                 </p>
               </div>
             </Reveal>
 
             {/* Role badge */}
-            <Reveal delay={0.06}>
+            <Reveal>
               <div style={{ ...card, padding: "11px 13px", display: "flex", alignItems: "center", gap: 11 }}>
                 <div style={{ width: 34, height: 34, borderRadius: 9, background: "#1a1916", border: "1px solid #2a2825", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <Layers size={15} color="#2dd4bf" />
@@ -363,12 +329,14 @@ export default function Portfolio() {
               </div>
             </Reveal>
 
-            {/* Skills */}
-            <SkillsBubble />
+            {/* Skills carousel */}
+            <div style={{ minWidth: 0, width: "100%" }}>
+              <SkillsBubble />
+            </div>
 
-            {/* GitHub stats — desktop/tablet only (left col) */}
-            <div className="gh-stats-left">
-              <Reveal delay={0.1}>
+            {/* GitHub stats — desktop/tablet only */}
+            {!isMobile && (
+              <Reveal>
                 <div style={{ ...card, padding: "13px 15px" }}>
                   <GitHubStats username="ralph12322" />
                   <div style={{ background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 8, padding: "7px 5px" }}>
@@ -376,10 +344,10 @@ export default function Portfolio() {
                   </div>
                 </div>
               </Reveal>
-            </div>
+            )}
 
             {/* Socials */}
-            <Reveal delay={0.12}>
+            <Reveal>
               <div style={{ ...card, padding: "11px 13px", display: "flex", gap: 6 }}>
                 {[
                   { href: "https://github.com/ralph12322", icon: <Github size={14} />, label: "GitHub" },
@@ -401,7 +369,7 @@ export default function Portfolio() {
           </div>
 
           {/* ══════════ RIGHT COLUMN ══════════ */}
-          <div className="col-right">
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
 
             {/* Tagline */}
             <Reveal>
@@ -413,8 +381,8 @@ export default function Portfolio() {
             </Reveal>
 
             {/* Experience + Roadmap */}
-            <div className="mid-row">
-              <Reveal delay={0.03}>
+            <div style={midRowStyle}>
+              <Reveal>
                 <div style={{ ...card, padding: "15px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>Experience</div>
@@ -442,7 +410,7 @@ export default function Portfolio() {
                 </div>
               </Reveal>
 
-              <Reveal delay={0.05}>
+              <Reveal>
                 <div style={{ ...card, padding: "15px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>Journey Roadmap</div>
@@ -481,7 +449,7 @@ export default function Portfolio() {
             </div>
 
             {/* GitHub contributions card */}
-            <Reveal delay={0.07}>
+            <Reveal>
               <div style={{ ...card, padding: "13px 15px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>GitHub Contributions</div>
@@ -489,10 +457,8 @@ export default function Portfolio() {
                     Live <ArrowUpRight size={9} />
                   </a>
                 </div>
-                {/* GH stats — mobile only, rendered inside this card */}
-                <div className="gh-stats-right">
-                  <GitHubStats username="ralph12322" />
-                </div>
+                {/* GH stats — mobile only */}
+                {isMobile && <GitHubStats username="ralph12322" />}
                 <div style={{ background: "#0f0e0c", border: "1px solid #1a1917", borderRadius: 7, padding: "8px 6px", marginBottom: 10, overflow: "hidden" }}>
                   <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
                 </div>
@@ -513,7 +479,7 @@ export default function Portfolio() {
             </Reveal>
 
             {/* Projects mini-grid */}
-            <Reveal delay={0.09}>
+            <Reveal>
               <div style={{ ...card, padding: "13px 15px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                   <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>Projects</div>
@@ -521,7 +487,7 @@ export default function Portfolio() {
                     All <ArrowUpRight size={9} />
                   </button>
                 </div>
-                <div className="proj-mini-grid">
+                <div style={projMiniGridStyle}>
                   {projects.map((p, i) => (
                     <div key={i}
                       style={{ background: "#0f0e0c", border: "1px solid #1a1917", borderTop: `2px solid ${p.accent}`, borderRadius: 9, padding: "12px", transition: "transform 0.2s, border-color 0.2s", cursor: "default" }}
@@ -555,8 +521,8 @@ export default function Portfolio() {
               </div>
             </Reveal>
 
-            {/* Interests tiles */}
-            <Reveal delay={0.11}>
+            {/* Interest tiles */}
+            <Reveal>
               <div style={{ ...card, padding: "13px 15px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
                   <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#57534e" }}>The Human Section</div>
@@ -564,7 +530,7 @@ export default function Portfolio() {
                     Interests &amp; Fun <ArrowUpRight size={9} />
                   </button>
                 </div>
-                <div className="tile-grid">
+                <div style={tileGridStyle}>
                   {interestTiles.map((tile, i) => (
                     <div key={i} onClick={() => open("interests")}
                       style={{ background: hoveredTile === i ? tile.bg : "#0f0e0c", border: `1px solid ${hoveredTile === i ? tile.color + "45" : "#1a1917"}`, borderRadius: 9, padding: "11px 9px", cursor: "pointer", transition: "all 0.2s", transform: hoveredTile === i ? "translateY(-2px)" : "translateY(0)" }}
@@ -584,26 +550,22 @@ export default function Portfolio() {
       {/* ══════════ CONTACT ══════════ */}
       <section id="contact" style={{ padding: "clamp(36px,6vw,56px) clamp(16px,4vw,20px)", background: "#0c0b09", borderTop: "1px solid #1a1917" }}>
         <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-          <Reveal>
-            <div style={{ fontSize: 9, letterSpacing: 4, textTransform: "uppercase", color: "#57534e", fontWeight: 700, marginBottom: 12 }}>CONTACT</div>
-            <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,6vw,44px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-1.5px", marginBottom: 12, lineHeight: 1.1 }}>
-              Let&apos;s build<br /><span style={{ color: "#2dd4bf", fontStyle: "italic" }}>something together</span>
-            </h2>
-            <p style={{ fontSize: "clamp(12px,1.5vw,13px)", color: "#57534e", lineHeight: 1.8, marginBottom: 28 }}>Open to internship opportunities, collaborations, and interesting conversations.</p>
-            <div className="contact-buttons" style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24 }}>
-              <a href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
-                className="contact-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#2dd4bf", color: "#0a0908", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
-                <Mail size={13} /> Send a message
-              </a>
-              <a href="https://www.facebook.com/ralph.santos.620659/"
-                className="contact-btn"
-                style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "transparent", color: "#78716c", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "1px solid #2a2825", fontFamily: "inherit" }}>
-                <Facebook size={13} /> Facebook
-              </a>
-            </div>
-            <p style={{ color: "#3a3733", fontSize: 11, borderTop: "1px solid #1a1917", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
-          </Reveal>
+          <div style={{ fontSize: 9, letterSpacing: 4, textTransform: "uppercase", color: "#57534e", fontWeight: 700, marginBottom: 12 }}>CONTACT</div>
+          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,6vw,44px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-1.5px", marginBottom: 12, lineHeight: 1.1 }}>
+            Let&apos;s build<br /><span style={{ color: "#2dd4bf", fontStyle: "italic" }}>something together</span>
+          </h2>
+          <p style={{ fontSize: "clamp(12px,1.5vw,13px)", color: "#57534e", lineHeight: 1.8, marginBottom: 28 }}>Open to internship opportunities, collaborations, and interesting conversations.</p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24, flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center" }}>
+            <a href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "#2dd4bf", color: "#0a0908", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
+              <Mail size={13} /> Send a message
+            </a>
+            <a href="https://www.facebook.com/ralph.santos.620659/"
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "transparent", color: "#78716c", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "1px solid #2a2825", fontFamily: "inherit" }}>
+              <Facebook size={13} /> Facebook
+            </a>
+          </div>
+          <p style={{ color: "#3a3733", fontSize: 11, borderTop: "1px solid #1a1917", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
         </div>
       </section>
 
@@ -617,7 +579,7 @@ export default function Portfolio() {
       <Panel open={panel === "about"} onClose={close}>
         <PanelHeader label="01 / About" title="Who I" italic="Am" onClose={close} />
         <div style={{ flex: 1, overflowY: "auto", padding: "clamp(16px,3vw,44px) clamp(14px,4vw,48px)" }}>
-          <div className="panel-about-grid">
+          <div style={panelAboutGridStyle}>
             <div>
               <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "#a8a29e", lineHeight: 1.9, marginBottom: 20 }}>
                 I&apos;m a <span style={{ color: "#fafaf9", fontWeight: 600 }}>fourth-year CS student</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks.
@@ -655,10 +617,12 @@ export default function Portfolio() {
         <PanelHeader label="02 / Projects" title="Things I've" italic="Shipped" onClose={close} />
         <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
           {projects.map((p, i) => (
-            <div key={i} className="panel-proj-row"
+            <div key={i} style={panelProjRowStyle}
               onMouseEnter={e => (e.currentTarget.style.opacity = "0.65")}
               onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
-              <div className="panel-proj-num" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#2a2825", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>
+              {!isMobile && (
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#2a2825", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>
+              )}
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 5 }}>{p.tag}</div>
                 <h3 style={{ fontSize: "clamp(14px,2.5vw,22px)", fontWeight: 700, color: "#fafaf9", letterSpacing: "-0.5px", margin: "0 0 9px", fontFamily: "'Playfair Display',serif" }}>{p.title}</h3>
@@ -666,29 +630,33 @@ export default function Portfolio() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                   {p.tech.map(t => <span key={t} style={{ padding: "3px 8px", borderRadius: 4, fontSize: 10, fontWeight: 600, fontFamily: "'JetBrains Mono',monospace", background: "#1a1916", color: "#57534e", border: "1px solid #2a2825" }}>{t}</span>)}
                 </div>
-                {/* Links shown inline on mobile */}
-                <div className="panel-proj-links-inline">
-                  {p.github !== "#" && <a href={p.github} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#57534e", fontWeight: 600 }}><Github size={12} /> Code</a>}
-                  <a href={p.demo} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600 }}><ExternalLink size={12} /> Demo</a>
-                </div>
-              </div>
-              {/* Links shown in right col on desktop */}
-              <div className="panel-proj-links-col">
-                {p.github !== "#" && (
-                  <a href={p.github} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#57534e", fontWeight: 600, transition: "color 0.2s", whiteSpace: "nowrap" }}
-                    onMouseEnter={e => e.currentTarget.style.color = "#fafaf9"}
-                    onMouseLeave={e => e.currentTarget.style.color = "#57534e"}>
-                    <Github size={12} /> Code
-                  </a>
+                {/* Links inline on mobile */}
+                {isMobile && (
+                  <div style={{ display: "flex", gap: 14, marginTop: 10 }}>
+                    {p.github !== "#" && <a href={p.github} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#57534e", fontWeight: 600 }}><Github size={12} /> Code</a>}
+                    <a href={p.demo} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600 }}><ExternalLink size={12} /> Demo</a>
+                  </div>
                 )}
-                <a href={p.demo} target="_blank" rel="noopener noreferrer"
-                  style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600, transition: "opacity 0.2s", whiteSpace: "nowrap" }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-                  <ExternalLink size={12} /> Demo
-                </a>
               </div>
+              {/* Links in right col on desktop */}
+              {!isMobile && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 9, paddingTop: 2, minWidth: 54 }}>
+                  {p.github !== "#" && (
+                    <a href={p.github} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "#57534e", fontWeight: 600, transition: "color 0.2s", whiteSpace: "nowrap" }}
+                      onMouseEnter={e => e.currentTarget.style.color = "#fafaf9"}
+                      onMouseLeave={e => e.currentTarget.style.color = "#57534e"}>
+                      <Github size={12} /> Code
+                    </a>
+                  )}
+                  <a href={p.demo} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600, transition: "opacity 0.2s", whiteSpace: "nowrap" }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
+                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                    <ExternalLink size={12} /> Demo
+                  </a>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -699,7 +667,7 @@ export default function Portfolio() {
         <PanelHeader label="03 / Experience" title="The" italic="Journey" onClose={close} />
         <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
           {timeline.map((item, i) => (
-            <div key={i} className="panel-exp-row"
+            <div key={i} style={panelExpRowStyle}
               onMouseEnter={e => e.currentTarget.style.opacity = "0.65"}
               onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
               <div style={{ paddingTop: 3, flexShrink: 0 }}>
@@ -718,7 +686,6 @@ export default function Portfolio() {
       {/* — Interests — */}
       <Panel open={panel === "interests"} onClose={close}>
         <PanelHeader label="04 / Interests" title="Beyond the" italic="Code" onClose={close} />
-        {/* Tab bar */}
         <div style={{ display: "flex", padding: "0 clamp(14px,4vw,48px)", borderBottom: "1px solid #1f1e1b", flexShrink: 0, overflowX: "auto", scrollbarWidth: "none" }}>
           {interests.map((b, i) => (
             <button key={i} onClick={() => setActiveInterest(i)}
@@ -729,7 +696,7 @@ export default function Portfolio() {
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
           {interests.map((b, i) => (
-            <div key={i} className="panel-interests-grid" style={{ display: activeInterest === i ? "grid" : "none" }}>
+            <div key={i} style={{ ...panelInterestsGridStyle, display: activeInterest === i ? "grid" : "none" }}>
               <div>
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 9, marginBottom: 18, color: b.accent }}>{b.icon}<span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase" }}>{b.category}</span></div>
                 <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "#a8a29e", lineHeight: 1.85 }}>{b.description}</p>

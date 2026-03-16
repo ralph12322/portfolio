@@ -21,7 +21,7 @@
   }
 }
 
-/* ─── Animations used across the site ─── */
+/* ─── Animations ─── */
 @keyframes typing {
   from { width: 0 }
   to   { width: 100% }
@@ -68,7 +68,271 @@
   animation: fade-in 1s ease-out;
 }
 
-/* ─── Scrollbar ─── */
-::-webkit-scrollbar              { width: 4px; }
-::-webkit-scrollbar-track        { background: #0a0908; }
-::-webkit-scrollbar-thumb        { background: #2a2825; border-radius: 2px; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0a0908; }
+::-webkit-scrollbar-thumb { background: #2a2825; border-radius: 2px; }
+
+a { text-decoration: none; }
+
+/* ─── Reveal animation ─── */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+@media (max-width: 767px) {
+  .reveal-hidden,
+  .reveal-visible {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ─── Panel drawer ─── */
+.panel-drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  z-index: 200;
+  width: min(96vw, 1100px);
+  background: #0d0c0a;
+  transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid #1f1e1b;
+}
+
+.close-btn {
+  background: #1a1916;
+  border: 1px solid #2a2825;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px; height: 40px; min-width: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  transition: background 0.2s, transform 0.3s;
+}
+.close-btn:hover {
+  background: #2a2825;
+  transform: rotate(90deg);
+}
+
+/* ═══════════════════════════════════════════
+   ROOT GRID & COLUMNS
+   ═══════════════════════════════════════════ */
+.root-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Sticky so it stays in view while scrolling the right col */
+  position: sticky;
+  top: 78px;
+  max-height: calc(100vh - 92px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.col-left::-webkit-scrollbar { display: none; }
+
+.col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Prevent children from overflowing on narrow screens */
+  min-width: 0;
+}
+
+/* ─── Experience + Roadmap side by side ─── */
+.mid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ─── Projects mini-cards ─── */
+.proj-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+/* ─── Interest tiles ─── */
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+/* ─── GitHub stats swap (desktop: left col / mobile: right col) ─── */
+.gh-stats-left  { display: block; }
+.gh-stats-right { display: none; }
+
+/* ═══════════════════════════════════════════
+   PANEL INTERNALS
+   ═══════════════════════════════════════════ */
+.panel-about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.panel-interests-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.panel-proj-row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 20px;
+  padding: 22px 0;
+  border-bottom: 1px solid #1f1e1b;
+  align-items: start;
+  transition: opacity 0.2s;
+}
+.panel-proj-links-col {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 2px;
+  min-width: 54px;
+}
+.panel-proj-links-inline {
+  display: none;
+  margin-top: 10px;
+  gap: 14px;
+}
+
+.panel-exp-row {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid #1f1e1b;
+  transition: opacity 0.2s;
+}
+
+/* ─── Contact buttons ─── */
+.contact-btn {
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.contact-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════
+   BREAKPOINTS
+   ═══════════════════════════════════════════ */
+
+/* ── Large tablet  769px – 1100px ── */
+@media (max-width: 1100px) {
+  .root-grid { grid-template-columns: 260px 1fr; gap: 10px; }
+}
+
+/* ── Tablet  641px – 900px ── */
+@media (max-width: 900px) {
+  /* Switch to a narrower left column; still two-column layout */
+  .root-grid {
+    grid-template-columns: 220px 1fr;
+    gap: 10px;
+  }
+
+  /* Left col no longer sticky — too short to need it at this size */
+  .col-left {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .proj-mini-grid { grid-template-columns: 1fr 1fr; }
+  .tile-grid      { grid-template-columns: repeat(2, 1fr); }
+  .mid-row        { grid-template-columns: 1fr; gap: 10px; }
+}
+
+/* ── Mobile  ≤ 767px — single column ── */
+@media (max-width: 767px) {
+  /* Stack everything into one column */
+  .root-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Left column goes full-width, no longer sticky */
+  .col-left {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+    width: 100%;
+  }
+
+  /* Photo card: cap height so it doesn't fill the whole viewport */
+  .col-left > div:first-child {
+    aspect-ratio: unset !important;
+    max-height: 55vw;
+    min-height: 220px;
+  }
+
+  .proj-mini-grid { grid-template-columns: 1fr 1fr; }
+  .tile-grid      { grid-template-columns: repeat(2, 1fr); }
+
+  /* Move GitHub stats out of left col into the right-col chart card */
+  .gh-stats-left  { display: none; }
+  .gh-stats-right { display: block; }
+
+  /* Full-width panel */
+  .panel-drawer         { width: 100vw; border-left: none; }
+
+  /* Panel grids collapse to single column */
+  .panel-about-grid     { grid-template-columns: 1fr; gap: 24px; }
+  .panel-interests-grid { grid-template-columns: 1fr; gap: 20px; }
+
+  /* Project rows: stack content, hide desktop number + link column */
+  .panel-proj-row          { grid-template-columns: 1fr; gap: 10px; }
+  .panel-proj-num          { display: none; }
+  .panel-proj-links-col    { display: none; }
+  .panel-proj-links-inline { display: flex; }
+
+  /* Experience rows: stack year badge above text */
+  .panel-exp-row { grid-template-columns: 1fr; gap: 6px; }
+}
+
+/* ── Small phone  ≤ 479px ── */
+@media (max-width: 479px) {
+  /* Project cards drop to single column */
+  .proj-mini-grid { grid-template-columns: 1fr; }
+
+  /* Keep interest tiles 2-col — they're compact enough */
+  .tile-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Contact buttons stack vertically */
+  .contact-buttons { flex-direction: column !important; align-items: stretch !important; }
+  .contact-btn     { justify-content: center !important; text-align: center; }
+
+  /* Tighten up main padding on very small screens */
+  main { padding-left: 8px !important; padding-right: 8px !important; }
+}

@@ -106,11 +106,6 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
           background: #2a2825 !important;
           color: #2dd4bf !important;
         }
-
-        /* ── Responsive: shrink bubble button on narrow left columns ── */
-        @media (max-width: 400px) {
-          .sb-bubble-btn { width: 48px !important; height: 48px !important; }
-        }
       `}</style>
 
       {/* ── Main bar ── */}
@@ -118,21 +113,28 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
         background: "#0d0c0b",
         border: "1px solid #1e1c1a",
         borderRadius: 14,
-        /* Use min-height instead of fixed height so it never clips */
         minHeight: 72,
+        /* Critical: don't exceed the column width */
+        width: "100%",
+        maxWidth: "100%",
         padding: "0 14px",
         display: "flex",
         alignItems: "center",
         gap: 12,
         position: "relative",
+        /* overflow hidden clips the scrolling track at the card edges */
         overflow: "hidden",
+        boxSizing: "border-box",
         fontFamily: "'Sora', sans-serif",
       }}>
 
-        {/* Carousel */}
+        {/* Carousel wrapper
+            - flex: 1 1 0  →  can grow AND shrink all the way to 0
+            - min-width: 0  →  the critical fix: without this, a flex child
+              won't shrink below its content width, blowing out the column   */}
         <div style={{
-          flex: 1,
-          minWidth: 0,          /* lets flex child shrink below content size */
+          flex: "1 1 0",
+          minWidth: 0,
           overflow: "hidden",
           position: "relative",
           height: 56,
@@ -140,11 +142,22 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
           alignItems: "center",
         }}>
           {/* Fade edges */}
-          <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 28, background: "linear-gradient(to right, #0d0c0b, transparent)", zIndex: 2, pointerEvents: "none" }} />
-          <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 28, background: "linear-gradient(to left, #0d0c0b, transparent)", zIndex: 2, pointerEvents: "none" }} />
+          <div style={{
+            position: "absolute", top: 0, left: 0, bottom: 0, width: 28,
+            background: "linear-gradient(to right, #0d0c0b, transparent)",
+            zIndex: 2, pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute", top: 0, right: 0, bottom: 0, width: 28,
+            background: "linear-gradient(to left, #0d0c0b, transparent)",
+            zIndex: 2, pointerEvents: "none",
+          }} />
 
-          {/* Scrolling track */}
-          <div className="sb-track" style={{ display: "flex", alignItems: "center", gap: 8, willChange: "transform" }}>
+          {/* Scrolling track — intentionally wider than container, clipped by parent overflow:hidden */}
+          <div
+            className="sb-track"
+            style={{ display: "flex", alignItems: "center", gap: 8, willChange: "transform" }}
+          >
             {doubled.map((s, i) => (
               <div
                 key={`${s.label}-${i}`}
@@ -160,7 +173,7 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
                   border: "1px solid #272421",
                   whiteSpace: "nowrap",
                   cursor: "default",
-                  flexShrink: 0,
+                  flexShrink: 0,   /* pills must NOT shrink — the track scrolls, not wraps */
                 }}
               >
                 <div style={{
@@ -183,15 +196,16 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
           </div>
         </div>
 
-        {/* Divider */}
+        {/* Divider — flexShrink: 0 so it never disappears */}
         <div style={{ width: 1, height: 40, background: "#1e1c1a", flexShrink: 0 }} />
 
-        {/* Bubble button — slightly smaller (56px) so it fits narrow columns */}
+        {/* Bubble button — flexShrink: 0 so it keeps its size at all column widths */}
         <button
           className="sb-bubble-btn"
           onClick={togglePanel}
           style={{
-            width: 56, height: 56,
+            width: 46,
+            height: 46,
             borderRadius: "50%",
             background: open ? "#0a1f1f" : "#2dd4bf",
             border: open ? "1.5px solid #2dd4bf" : "none",
@@ -223,7 +237,6 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
-            /* Subtle backdrop so it feels intentional */
             background: "rgba(0,0,0,0.4)",
             backdropFilter: "blur(4px)",
             transition: "background 0.3s",
@@ -234,12 +247,9 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
             border: "1px solid #1e1c1a",
             borderTop: "1px solid rgba(45,212,191,0.15)",
             borderRadius: "16px 16px 0 0",
-            /* Padding scales with viewport: more breathing room on large screens */
             padding: "20px clamp(16px, 5vw, 32px) 36px",
             width: "100%",
-            /* Cap width on large screens; on mobile it fills edge-to-edge */
             maxWidth: "min(520px, 100vw)",
-            /* Never taller than 80% of the viewport */
             maxHeight: "80vh",
             overflowY: "auto",
             transform: panelOpen ? "translateY(0)" : "translateY(100%)",
@@ -247,27 +257,36 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
           }}>
 
             {/* Drag handle */}
-            <div style={{ width: 36, height: 3, borderRadius: 99, background: "#2a2825", margin: "0 auto 18px" }} />
+            <div style={{
+              width: 36, height: 3, borderRadius: 99,
+              background: "#2a2825", margin: "0 auto 18px",
+            }} />
 
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#3a3733", fontFamily: "'Sora', sans-serif" }}>
+            <div style={{
+              display: "flex", justifyContent: "space-between",
+              alignItems: "center", marginBottom: 16,
+            }}>
+              <span style={{
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: "0.18em", textTransform: "uppercase",
+                color: "#3a3733", fontFamily: "'Sora', sans-serif",
+              }}>
                 Full Stack
               </span>
-              <span style={{ fontSize: 11, color: "#3a3733", fontFamily: "'JetBrains Mono', monospace" }}>
+              <span style={{
+                fontSize: 11, color: "#3a3733",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}>
                 {skills.length} skills
               </span>
               <button
                 className="sb-close-btn"
                 onClick={togglePanel}
                 style={{
-                  width: 28, height: 28,
-                  borderRadius: "50%",
-                  background: "#1a1815",
-                  border: "1px solid #2a2825",
-                  color: "#57534e",
-                  fontSize: 14,
-                  cursor: "pointer",
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "#1a1815", border: "1px solid #2a2825",
+                  color: "#57534e", fontSize: 14, cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}
               >✕</button>
