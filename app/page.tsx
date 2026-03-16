@@ -53,7 +53,7 @@ function GitHubStats({ username }: { username: string }) {
     <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
       {[{ label: "PUBLIC REPOS", value: repos }, { label: "CONTRIBUTIONS", value: contributions }].map((s, i) => (
         <div key={i} style={{ flex: 1, background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "9px 11px" }}>
-          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: "var(--text-ghost)", marginBottom: 3, fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
+          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: "#ffff", marginBottom: 3, fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-1px" }}>{s.value}</div>
         </div>
       ))}
@@ -360,6 +360,9 @@ export default function Portfolio() {
                 ))}
               </div>
             </Reveal>
+            <div style={{ textAlign: "center", padding: "20px 0 8px", borderTop: "1px solid var(--border-subtle)" }}>
+                <p style={{ color: "#979797", fontSize: 11 }}>© 2025 Ralph Geo Santos</p>
+              </div>
           </div>
 
           {/* ══ RIGHT COLUMN ══ */}
@@ -395,11 +398,11 @@ export default function Portfolio() {
                         { period: "2022–26", title: "B.S. Computer Science", co: "University", accent: "#0d9488" },
                       ].map((item, i) => (
                         <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 1fr", gap: 9, marginBottom: i < 2 ? 13 : 0 }}>
-                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 2 }}>
-                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: item.accent, border: "2px solid var(--bg-page)", zIndex: 1, boxShadow: `0 0 0 2px ${item.accent}25`, flexShrink: 0 }} />
+                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 2, position: "relative" }}>
+                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: item.accent, border: "2px solid var(--bg-page)", boxShadow: `0 0 0 2px ${item.accent}25`, flexShrink: 0 }} />
                           </div>
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 9, color: "var(--text-ghost)", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>{item.period}</div>
+                            <div style={{ fontSize: 9, color: "#ffff", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>{item.period}</div>
                             <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 1 }}>{item.title}</div>
                             <div style={{ fontSize: 10, color: item.accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.co}</div>
                           </div>
@@ -413,13 +416,13 @@ export default function Portfolio() {
                   <div style={{ ...card, padding: "15px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                       <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Journey Roadmap</div>
-                      <span style={{ fontSize: 9, color: "var(--text-dead)", fontStyle: "italic", fontFamily: "'Playfair Display',serif", flexShrink: 0 }}>Aspirational</span>
+                      <span style={{ fontSize: 9, color: "#ffff", fontStyle: "italic", fontFamily: "'Playfair Display',serif", flexShrink: 0 }}>Aspirational</span>
                     </div>
                     <div style={{ position: "relative", paddingLeft: 8 }}>
                       <div style={{ position: "absolute", left: 8, top: 5, bottom: 5, width: 2, background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)", borderRadius: 2, opacity: 0.3 }} />
                       {roadmap.map((step, i) => (
                         <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 7, marginBottom: i < roadmap.length - 1 ? 9 : 0 }}>
-                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 1, zIndex: 1 }}>
+                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 1, position: "relative" }}>
                             {step.status === "done" ? (
                               <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                                 <CheckCircle2 size={6} color="var(--bg-page)" strokeWidth={3} />
@@ -431,9 +434,9 @@ export default function Portfolio() {
                             )}
                           </div>
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-dead)" }}>{step.phase}</div>
-                            <div style={{ fontSize: 11, fontWeight: 700, color: step.status === "future" ? "var(--text-dead)" : "var(--text-secondary)" }}>{step.label}</div>
-                            <div style={{ fontSize: 9, color: step.status === "future" ? "var(--border-default)" : "var(--text-ghost)" }}>{step.desc}</div>
+                            <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: "#b3b3b3" }}>{step.phase}</div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: step.status === "future" ? "#ffff" : "var(--text-secondary)" }}>{step.label}</div>
+                            <div style={{ fontSize: 9, color: step.status === "future" ? "#888888" : "#888888" }}>{step.desc}</div>
                             {step.status === "active" && (
                               <div style={{ marginTop: 2, display: "inline-flex", alignItems: "center", gap: 3, background: step.accent + "18", padding: "1px 5px", borderRadius: 6, fontSize: 7, fontWeight: 700, color: step.accent, letterSpacing: 1 }}>
                                 <Zap size={6} style={{ animation: "pulse 1.5s infinite" }} /> NOW
@@ -484,9 +487,9 @@ export default function Portfolio() {
                         }}>
                         <div style={{ fontSize: 8, letterSpacing: 2, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 4, fontFamily: "'JetBrains Mono',monospace" }}>{p.tag}</div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 5, fontFamily: "'Playfair Display',serif" }}>{p.title}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-ghost)", lineHeight: 1.5, marginBottom: 8 }}>{p.description.slice(0, 85)}…</div>
+                        <div style={{ fontSize: 10, color: "#888888", lineHeight: 1.5, marginBottom: 8 }}>{p.description.slice(0, 85)}…</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 9 }}>
-                          {p.tech.slice(0, 3).map(t => <span key={t} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 8, fontFamily: "'JetBrains Mono',monospace", background: "var(--bg-hover)", color: "var(--text-ghost)", border: "1px solid var(--border-strong)" }}>{t}</span>)}
+                          {p.tech.slice(0, 3).map(t => <span key={t} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 8, fontFamily: "'JetBrains Mono',monospace", background: "var(--bg-hover)", color: "#8a8a8a", border: "1px solid var(--border-strong)" }}>{t}</span>)}
                         </div>
                         <div style={{ display: "flex", gap: 12 }}>
                           {p.github !== "#" && (
@@ -525,8 +528,8 @@ export default function Portfolio() {
                         style={{ background: hoveredTile === i ? tileBg(tile.bg) : "var(--bg-card-inner)", border: `1px solid ${hoveredTile === i ? tile.color + "45" : "var(--border-subtle)"}`, borderRadius: 9, padding: "11px 9px", cursor: "pointer", transition: "all 0.2s", transform: hoveredTile === i ? "translateY(-2px)" : undefined }}
                         onMouseEnter={() => setHoveredTile(i)} onMouseLeave={() => setHoveredTile(null)}>
                         <div style={{ fontSize: 17, marginBottom: 5, color: hoveredTile === i ? tile.color : "var(--text-faint)", transition: "color 0.2s" }}>{tile.icon}</div>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: hoveredTile === i ? tile.color : "var(--text-muted)", marginBottom: 2, transition: "color 0.2s" }}>{tile.label}</div>
-                        <div style={{ fontSize: 8, color: "var(--text-dead)", lineHeight: 1.4 }}>{tile.sub}</div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: hoveredTile === i ? tile.color : "var(--text-primary)", marginBottom: 2, transition: "color 0.2s" }}>{tile.label}</div>
+                        <div style={{ fontSize: 8, color: "#888888", lineHeight: 1.4 }}>{tile.sub}</div>
                       </div>
                     ))}
                   </div>
@@ -551,13 +554,11 @@ export default function Portfolio() {
                       <Facebook size={13} /> Facebook
                     </a>
                   </div>
-                  <p style={{ color: "var(--text-ghost)", fontSize: 11, borderTop: "1px solid var(--border-subtle)", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
+                  <p style={{ color: "#ffff", fontSize: 11, borderTop: "1px solid var(--border-subtle)", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
                 </div>
               </section>
 
-              <div style={{ textAlign: "center", padding: "20px 0 8px", borderTop: "1px solid var(--border-subtle)" }}>
-                <p style={{ color: "var(--text-dead)", fontSize: 11 }}>© 2025 Ralph Geo Santos</p>
-              </div>
+              
             </div>
 
 
@@ -589,8 +590,8 @@ export default function Portfolio() {
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {Object.entries(skills).map(([cat, items]) => (
                 <div key={cat}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-ghost)", marginBottom: 9, display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 12, height: 1, background: "var(--text-ghost)", flexShrink: 0 }} />{cat}
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#ffff", marginBottom: 9, display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 12, height: 1, background: "#ffff", flexShrink: 0 }} />{cat}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {items.map(s => (
@@ -617,7 +618,7 @@ export default function Portfolio() {
             <div key={i} style={panelProjRowStyle}
               onMouseEnter={e => (e.currentTarget.style.opacity = "0.65")}
               onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
-              {!isMobile && <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "var(--text-dead)", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>}
+              {!isMobile && <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#ffff", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>}
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 5 }}>{p.tag}</div>
                 <h3 style={{ fontSize: "clamp(14px,2.5vw,22px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.5px", margin: "0 0 9px", fontFamily: "'Playfair Display',serif" }}>{p.title}</h3>
@@ -667,7 +668,7 @@ export default function Portfolio() {
                 <span style={{ fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace", padding: "4px 9px", background: `${item.accent}18`, color: item.accent, borderRadius: 4, border: `1px solid ${item.accent}30`, display: "inline-block" }}>{item.year}</span>
               </div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-ghost)", fontWeight: 700, marginBottom: 5 }}>{item.company}</div>
+                <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: "#ffff", fontWeight: 700, marginBottom: 5 }}>{item.company}</div>
                 <h3 style={{ fontSize: "clamp(13px,2vw,19px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.3px", margin: "0 0 7px", fontFamily: "'Playfair Display',serif" }}>{item.title}</h3>
                 <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "var(--text-faint)", lineHeight: 1.7, maxWidth: 480 }}>{item.description}</p>
               </div>
@@ -682,8 +683,8 @@ export default function Portfolio() {
         <div style={{ display: "flex", padding: "0 clamp(14px,4vw,48px)", borderBottom: "1px solid var(--border-default)", flexShrink: 0, overflowX: "auto", scrollbarWidth: "none" }}>
           {interests.map((b, i) => (
             <button key={i} onClick={() => setActiveInterest(i)}
-              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "clamp(11px,1.3vw,12px)", fontWeight: 600, padding: "12px clamp(10px,2vw,16px)", color: activeInterest === i ? "var(--text-primary)" : "var(--text-ghost)", borderBottom: activeInterest === i ? `2px solid ${b.accent}` : "2px solid transparent", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
-              <span style={{ color: activeInterest === i ? b.accent : "var(--text-ghost)", transition: "color 0.2s", display: "flex" }}>{b.icon}</span>{b.category}
+              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "clamp(11px,1.3vw,12px)", fontWeight: 600, padding: "12px clamp(10px,2vw,16px)", color: activeInterest === i ? "var(--text-primary)" : "#ffff", borderBottom: activeInterest === i ? `2px solid ${b.accent}` : "2px solid transparent", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
+              <span style={{ color: activeInterest === i ? b.accent : "#ffff", transition: "color 0.2s", display: "flex" }}>{b.icon}</span>{b.category}
             </button>
           ))}
         </div>
@@ -705,7 +706,7 @@ export default function Portfolio() {
                     onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 3 }}>{item.label}</div>
-                      <div style={{ fontSize: 11, color: "var(--text-ghost)" }}>{item.sub}</div>
+                      <div style={{ fontSize: 11, color: "#ffff" }}>{item.sub}</div>
                     </div>
                     <div style={{ width: 5, height: 5, borderRadius: "50%", background: b.accent, flexShrink: 0 }} />
                   </div>

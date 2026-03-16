@@ -1,18 +1,46 @@
 'use client';
 import { useState, useRef } from "react";
+import { LucideIcon, Atom, FileCode2, Server, Leaf, Zap, BrainCircuit, Wind,
+  GitBranch, Database, Container, Cloud, FlameKindling, PenTool,
+  Flower2, ImageUp, Lightbulb, MonitorPlay, Code2, Triangle,
+  Palette, Train, Braces, Mail, KeyRound, Flame, Layers,
+  PackageCheck } from "lucide-react";
 
-interface Skill { label: string; icon: string; }
+interface Skill { label: string; icon: LucideIcon; }
 interface SkillsBubbleProps { skills?: Skill[]; }
 
 const DEFAULT_SKILLS: Skill[] = [
-  { label: "React",      icon: "⚛"  }, { label: "Next.js",    icon: "N"  },
-  { label: "TypeScript", icon: "TS" }, { label: "Node.js",    icon: "🟢" },
-  { label: "MongoDB",    icon: "🍃" }, { label: "Express",    icon: "EX" },
-  { label: "Python",     icon: "🐍" }, { label: "Tailwind",   icon: "🌊" },
-  { label: "Git",        icon: "G"  }, { label: "PostgreSQL", icon: "🐘" },
-  { label: "Docker",     icon: "🐳" }, { label: "GraphQL",    icon: "◈"  },
-  { label: "Redis",      icon: "R"  }, { label: "Figma",      icon: "F"  },
-  { label: "AWS",        icon: "☁"  },
+  { label: "React",       icon: Atom          },
+  { label: "Next.js",     icon: Triangle      },
+  { label: "TypeScript",  icon: FileCode2     },
+  { label: "Node.js",     icon: Server        },
+  { label: "MongoDB",     icon: Leaf          },
+  { label: "Express",     icon: Zap           },
+  { label: "Python",      icon: BrainCircuit  },
+  { label: "Tailwind",    icon: Wind          },
+  { label: "Git",         icon: GitBranch     },
+  { label: "PostgreSQL",  icon: Database      },
+  { label: "Docker",      icon: Container     },
+  { label: "Axios",       icon: Cloud         },
+  { label: "Redis",       icon: FlameKindling },
+  { label: "Figma",       icon: PenTool       },
+  { label: "DaisyUI",     icon: Flower2       },
+  { label: "Cloudinary",  icon: ImageUp       },
+  { label: "Lucide",      icon: Lightbulb     },
+  { label: "Render",      icon: MonitorPlay   },
+  { label: "HTML",        icon: Code2         },
+  { label: "Vercel",      icon: Triangle      },
+  { label: "CSS",         icon: Palette       },
+  { label: "Railway",     icon: Train         },
+  { label: "Javascript",  icon: Braces        },
+  { label: "PostMan",     icon: Mail          },
+  { label: "JWT",         icon: KeyRound      },
+  { label: "Firebase",    icon: Flame         },
+  { label: "Supabase",    icon: Layers        },
+  { label: "NPM",         icon: PackageCheck  },
+  { label: "Svelte",         icon: Flame  },
+  { label: "Sveltekit",         icon: Zap  },
+
 ];
 
 export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubbleProps) {
@@ -72,16 +100,21 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
           <div style={{position:"absolute",top:0,right:0,bottom:0,width:28,background:"linear-gradient(to left,var(--bg-subtle),transparent)",zIndex:2,pointerEvents:"none"}}/>
           {/* Track */}
           <div className="sb-track" style={{display:"flex",alignItems:"center",gap:8,willChange:"transform"}}>
-            {doubled.map((s,i)=>(
-              <div key={`${s.label}-${i}`} className="sb-pill" style={{
-                display:"flex",alignItems:"center",gap:7,padding:"0 11px",height:36,
-                borderRadius:8,background:"var(--bg-card)",border:"1px solid var(--border-subtle)",
-                whiteSpace:"nowrap",cursor:"default",flexShrink:0,
-              }}>
-                <div style={{width:20,height:20,borderRadius:4,background:"var(--bg-card-inner)",border:"1px solid var(--border-strong)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,flexShrink:0}}>{s.icon}</div>
-                <span className="sb-pill-label" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:500,color:"var(--text-muted)",letterSpacing:"0.02em"}}>{s.label}</span>
-              </div>
-            ))}
+            {doubled.map((s,i) => {
+              const Icon = s.icon;
+              return (
+                <div key={`${s.label}-${i}`} className="sb-pill" style={{
+                  display:"flex",alignItems:"center",gap:7,padding:"0 11px",height:36,
+                  borderRadius:8,background:"var(--bg-card)",border:"1px solid var(--border-subtle)",
+                  whiteSpace:"nowrap",cursor:"default",flexShrink:0,
+                }}>
+                  <div style={{width:20,height:20,borderRadius:4,background:"var(--bg-card-inner)",border:"1px solid var(--border-strong)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <Icon size={12} strokeWidth={1.75} />
+                  </div>
+                  <span className="sb-pill-label" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:500,color:"var(--text-muted)",letterSpacing:"0.02em"}}>{s.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -107,7 +140,7 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
 
       {/* Bottom sheet */}
       {panelVisible && (
-        <div ref={overlayRef} onClick={handleOverlayClick} style={{position:"fixed",inset:0,zIndex:1200,display:"flex",alignItems:"flex-end",justifyContent:"center",background:"rgba(0,0,0,0.25)",backdropFilter:"blur(2px)",transition:"background 0.3s"}}>
+        <div ref={overlayRef} onClick={handleOverlayClick} style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"flex-end",justifyContent:"center",background:"rgba(0,0,0,0.25)",backdropFilter:"blur(2px)",transition:"background 0.3s"}}>
           <div style={{background:"var(--bg-card)",border:"1px solid var(--border-default)",borderTop:"1px solid rgba(45,212,191,0.15)",borderRadius:"16px 16px 0 0",padding:"20px clamp(16px,5vw,32px) 36px",width:"100%",maxWidth:"min(520px,100vw)",maxHeight:"80vh",overflowY:"auto",transform:panelOpen?"translateY(0)":"translateY(100%)",transition:"transform 0.38s cubic-bezier(0.34,1.56,0.64,1)"}}>
             <div style={{width:36,height:3,borderRadius:99,background:"var(--border-strong)",margin:"0 auto 18px"}}/>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -116,9 +149,15 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
               <button className="sb-close-btn" onClick={togglePanel} style={{width:28,height:28,borderRadius:"50%",background:"var(--bg-card-inner)",border:"1px solid var(--border-strong)",color:"var(--text-faint)",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
             </div>
             <div style={{display:"flex",flexWrap:"wrap",gap:7}}>
-              {skills.map((s,i)=>(
-                <span key={s.label} className="sb-panel-tag" style={{padding:"5px 12px",background:"var(--bg-card-inner)",border:"1px solid var(--border-strong)",borderRadius:6,fontSize:11,fontFamily:"'JetBrains Mono',monospace",color:"var(--text-faint)",cursor:"default",animationDelay:`${i*35}ms`}}>{s.label}</span>
-              ))}
+              {skills.map((s,i) => {
+                const Icon = s.icon;
+                return (
+                  <span key={s.label} className="sb-panel-tag" style={{display:"flex",alignItems:"center",gap:5,padding:"5px 12px",background:"var(--bg-card-inner)",border:"1px solid var(--border-strong)",borderRadius:6,fontSize:11,fontFamily:"'JetBrains Mono',monospace",color:"var(--text-faint)",cursor:"default",animationDelay:`${i*35}ms`}}>
+                    <Icon size={11} strokeWidth={1.75} />
+                    {s.label}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>
