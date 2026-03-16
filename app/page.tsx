@@ -12,6 +12,7 @@ import SkillsBubble from "./components/SkillCarousel";
 import ShootingStars from "./components/Shootingstars";
 import { useTheme } from "./components/Themeprovider";
 import { useRef } from "react";
+import SpotifyWidget from "./components/Spotifywidget";
 
 interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
 interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
@@ -212,7 +213,7 @@ export default function Portfolio() {
     ...(isDesktop
       ? { position: "sticky", top: 78, maxHeight: "calc(100vh - 92px)", overflowY: "auto", scrollbarWidth: "none" as const }
       : { position: "static", maxHeight: "none", overflowY: "visible" }),
-    
+
   };
 
   const photoCardStyle: React.CSSProperties = {
@@ -275,7 +276,7 @@ export default function Portfolio() {
       <Navbar navItems={navItems} activeNav={activeNav} />
 
       {/* Spacer */}
-      <div style={{ paddingTop: 64, background: "var(--bg-page)", borderBottom: "1px solid var(--border-subtle)" }} />
+      <div style={{ paddingTop: 64, background: "var(--bg-page)", }} />
 
       <main style={{ maxWidth: 1380, margin: "0 auto", padding: isMobile ? "12px 10px 0" : "14px clamp(10px,3vw,16px) 0" }}>
         <div style={rootGridStyle}>
@@ -328,19 +329,6 @@ export default function Portfolio() {
             <div style={{ minWidth: 0, width: "100%" }}>
               <SkillsBubble />
             </div>
-
-            {/* GitHub stats desktop only */}
-            {!isMobile && (
-              <Reveal>
-                <div style={{ ...card, padding: "13px 15px" }}>
-                  <GitHubStats username="ralph12322" />
-                  <div style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "7px 5px" }}>
-                    <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
-                  </div>
-                </div>
-              </Reveal>
-            )}
-
             {/* Socials */}
             <Reveal>
               <div style={{ ...card, padding: "11px 13px", display: "flex", gap: 6 }}>
@@ -361,211 +349,213 @@ export default function Portfolio() {
                 ))}
               </div>
             </Reveal>
+
+            <Reveal>
+              <SpotifyWidget />
+            </Reveal>
           </div>
 
           {/* ══ RIGHT COLUMN ══ */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0, paddingBottom: 48 }}>
+          <div style={{
+            maxHeight: "calc(100vh - 92px)",
+            overflowY: "auto",
+            scrollbarWidth: "none",
+          }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0, paddingBottom: 48 }}>
 
-            {/* Tagline */}
-            <Reveal>
-              <div style={{ ...card, padding: "clamp(14px,2vw,18px) clamp(14px,2vw,20px)" }}>
-                <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "var(--text-muted)", lineHeight: 1.75 }}>
-                  Building at the intersection of <span style={{ color: "var(--accent)", fontWeight: 600 }}>full-stack engineering</span>, clean UI, and <span style={{ color: "var(--accent-dim)", fontWeight: 600 }}>developer experience</span> — crafting apps that are fast, scalable, and genuinely useful.
-                </p>
-              </div>
-            </Reveal>
-
-            {/* Experience + Roadmap */}
-            <div style={midRowStyle}>
+              {/* Tagline */}
               <Reveal>
-                <div style={{ ...card, padding: "15px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Experience</div>
-                    <button onClick={() => open("experience")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>Full <ArrowUpRight size={9} /></button>
-                  </div>
-                  <div style={{ position: "relative" }}>
-                    <div style={{ position: "absolute", left: 6, top: 8, bottom: 8, width: 1, background: "var(--border-default)" }} />
-                    {[
-                      { period: "2026–Now", title: "Fullstack Dev Intern", co: "Jurisprudence App. Services", accent: "#2dd4bf" },
-                      { period: "2025", title: "Thesis Defense", co: "University · TrackTag", accent: "#99f6e4" },
-                      { period: "2022–26", title: "B.S. Computer Science", co: "University", accent: "#0d9488" },
-                    ].map((item, i) => (
-                      <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 1fr", gap: 9, marginBottom: i < 2 ? 13 : 0 }}>
-                        <div style={{ display: "flex", justifyContent: "center", paddingTop: 2 }}>
-                          <div style={{ width: 12, height: 12, borderRadius: "50%", background: item.accent, border: "2px solid var(--bg-page)", zIndex: 1, boxShadow: `0 0 0 2px ${item.accent}25`, flexShrink: 0 }} />
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 9, color: "var(--text-ghost)", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>{item.period}</div>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 1 }}>{item.title}</div>
-                          <div style={{ fontSize: 10, color: item.accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.co}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div style={{ ...card, padding: "clamp(14px,2vw,18px) clamp(14px,2vw,20px)" }}>
+                  <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "var(--text-muted)", lineHeight: 1.75 }}>
+                    Building at the intersection of <span style={{ color: "var(--accent)", fontWeight: 600 }}>full-stack engineering</span>, clean UI, and <span style={{ color: "var(--accent-dim)", fontWeight: 600 }}>developer experience</span> — crafting apps that are fast, scalable, and genuinely useful.
+                  </p>
                 </div>
               </Reveal>
 
-              <Reveal>
-                <div style={{ ...card, padding: "15px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Journey Roadmap</div>
-                    <span style={{ fontSize: 9, color: "var(--text-dead)", fontStyle: "italic", fontFamily: "'Playfair Display',serif", flexShrink: 0 }}>Aspirational</span>
-                  </div>
-                  <div style={{ position: "relative", paddingLeft: 8 }}>
-                    <div style={{ position: "absolute", left: 8, top: 5, bottom: 5, width: 2, background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)", borderRadius: 2, opacity: 0.3 }} />
-                    {roadmap.map((step, i) => (
-                      <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 7, marginBottom: i < roadmap.length - 1 ? 9 : 0 }}>
-                        <div style={{ display: "flex", justifyContent: "center", paddingTop: 1, zIndex: 1 }}>
-                          {step.status === "done" ? (
-                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <CheckCircle2 size={6} color="var(--bg-page)" strokeWidth={3} />
-                            </div>
-                          ) : step.status === "active" ? (
-                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", animation: "roadPulse 2s infinite", flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: "transparent", border: `2px solid ${step.accent}30`, flexShrink: 0 }} />
-                          )}
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-dead)" }}>{step.phase}</div>
-                          <div style={{ fontSize: 11, fontWeight: 700, color: step.status === "future" ? "var(--text-dead)" : "var(--text-secondary)" }}>{step.label}</div>
-                          <div style={{ fontSize: 9, color: step.status === "future" ? "var(--border-default)" : "var(--text-ghost)" }}>{step.desc}</div>
-                          {step.status === "active" && (
-                            <div style={{ marginTop: 2, display: "inline-flex", alignItems: "center", gap: 3, background: step.accent + "18", padding: "1px 5px", borderRadius: 6, fontSize: 7, fontWeight: 700, color: step.accent, letterSpacing: 1 }}>
-                              <Zap size={6} style={{ animation: "pulse 1.5s infinite" }} /> NOW
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-
-            {/* GitHub contributions card */}
-            <Reveal>
-              <div style={{ ...card, padding: "13px 15px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>GitHub Contributions</div>
-                  <a href="https://github.com/ralph12322" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: "var(--accent)", fontWeight: 700, display: "flex", alignItems: "center", gap: 3, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
-                    Live <ArrowUpRight size={9} />
-                  </a>
-                </div>
-                {isMobile && <GitHubStats username="ralph12322" />}
-                <div style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 7, padding: "8px 6px", marginBottom: 10, overflow: "hidden" }}>
-                  <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                  {[
-                    { icon: <GitPullRequest size={11} />, text: "merged PR #73 · tracktag", sub: "3 months ago", color: "#5eead4" },
-                    { icon: <GitCommit size={11} />, text: "pushed 4 commits · spotify-clone", sub: "1 month ago", color: "#14b8a6" },
-                    { icon: <Star size={11} />, text: "starred emovox", sub: "2 months ago", color: "#99f6e4" },
-                  ].map((item, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                      <div style={{ color: item.color, display: "flex", flexShrink: 0 }}>{item.icon}</div>
-                      <span style={{ fontSize: 11, color: "var(--text-faint)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.text}</span>
-                      <span style={{ fontSize: 9, color: "var(--text-faint)", whiteSpace: "nowrap", marginLeft: 4, flexShrink: 0 }}>{item.sub}</span>
+              {/* Experience + Roadmap */}
+              <div style={midRowStyle}>
+                <Reveal>
+                  <div style={{ ...card, padding: "15px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Experience</div>
+                      <button onClick={() => open("experience")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>Full <ArrowUpRight size={9} /></button>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
+                    <div style={{ position: "relative" }}>
+                      <div style={{ position: "absolute", left: 6, top: 8, bottom: 8, width: 1, background: "var(--border-default)" }} />
+                      {[
+                        { period: "2026–Now", title: "Fullstack Dev Intern", co: "Jurisprudence App. Services", accent: "#2dd4bf" },
+                        { period: "2025", title: "Thesis Defense", co: "University · TrackTag", accent: "#99f6e4" },
+                        { period: "2022–26", title: "B.S. Computer Science", co: "University", accent: "#0d9488" },
+                      ].map((item, i) => (
+                        <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 1fr", gap: 9, marginBottom: i < 2 ? 13 : 0 }}>
+                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 2 }}>
+                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: item.accent, border: "2px solid var(--bg-page)", zIndex: 1, boxShadow: `0 0 0 2px ${item.accent}25`, flexShrink: 0 }} />
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 9, color: "var(--text-ghost)", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>{item.period}</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 1 }}>{item.title}</div>
+                            <div style={{ fontSize: 10, color: item.accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.co}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Reveal>
 
-            {/* Projects mini-grid */}
-            <Reveal>
-              <div style={{ ...card, padding: "13px 15px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Projects</div>
-                  <button onClick={() => open("projects")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
-                    All <ArrowUpRight size={9} />
-                  </button>
+                <Reveal>
+                  <div style={{ ...card, padding: "15px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Journey Roadmap</div>
+                      <span style={{ fontSize: 9, color: "var(--text-dead)", fontStyle: "italic", fontFamily: "'Playfair Display',serif", flexShrink: 0 }}>Aspirational</span>
+                    </div>
+                    <div style={{ position: "relative", paddingLeft: 8 }}>
+                      <div style={{ position: "absolute", left: 8, top: 5, bottom: 5, width: 2, background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)", borderRadius: 2, opacity: 0.3 }} />
+                      {roadmap.map((step, i) => (
+                        <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 7, marginBottom: i < roadmap.length - 1 ? 9 : 0 }}>
+                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 1, zIndex: 1 }}>
+                            {step.status === "done" ? (
+                              <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                <CheckCircle2 size={6} color="var(--bg-page)" strokeWidth={3} />
+                              </div>
+                            ) : step.status === "active" ? (
+                              <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", animation: "roadPulse 2s infinite", flexShrink: 0 }} />
+                            ) : (
+                              <div style={{ width: 12, height: 12, borderRadius: "50%", background: "transparent", border: `2px solid ${step.accent}30`, flexShrink: 0 }} />
+                            )}
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-dead)" }}>{step.phase}</div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: step.status === "future" ? "var(--text-dead)" : "var(--text-secondary)" }}>{step.label}</div>
+                            <div style={{ fontSize: 9, color: step.status === "future" ? "var(--border-default)" : "var(--text-ghost)" }}>{step.desc}</div>
+                            {step.status === "active" && (
+                              <div style={{ marginTop: 2, display: "inline-flex", alignItems: "center", gap: 3, background: step.accent + "18", padding: "1px 5px", borderRadius: 6, fontSize: 7, fontWeight: 700, color: step.accent, letterSpacing: 1 }}>
+                                <Zap size={6} style={{ animation: "pulse 1.5s infinite" }} /> NOW
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Reveal>
+              </div>
+
+              {/* GitHub contributions card */}
+              <Reveal>
+                <div style={{ ...card, padding: "13px 15px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>GitHub Contributions</div>
+                    <a href="https://github.com/ralph12322" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: "var(--accent)", fontWeight: 700, display: "flex", alignItems: "center", gap: 3, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                      Live <ArrowUpRight size={9} />
+                    </a>
+                  </div>
+                  {isMobile && <GitHubStats username="ralph12322" />}
+                  <div style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 7, padding: "8px 6px", marginBottom: 10, overflow: "hidden" }}>
+                    <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
+                  </div>
+                  <GitHubStats username="ralph12322" />
                 </div>
-                <div style={projMiniGridStyle}>
-                  {projects.map((p, i) => (
-                    <div key={i}
-                      style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderTop: `2px solid ${p.accent}`, borderRadius: 9, padding: "12px", transition: "transform 0.2s, border-color 0.2s", cursor: "default" }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.borderColor = p.accent; }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLDivElement).style.transform = ""; // ← empty string, not "translateY(0)"
-                        (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-subtle)";
-                      }}>
-                      <div style={{ fontSize: 8, letterSpacing: 2, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 4, fontFamily: "'JetBrains Mono',monospace" }}>{p.tag}</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 5, fontFamily: "'Playfair Display',serif" }}>{p.title}</div>
-                      <div style={{ fontSize: 10, color: "var(--text-ghost)", lineHeight: 1.5, marginBottom: 8 }}>{p.description.slice(0, 85)}…</div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 9 }}>
-                        {p.tech.slice(0, 3).map(t => <span key={t} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 8, fontFamily: "'JetBrains Mono',monospace", background: "var(--bg-hover)", color: "var(--text-ghost)", border: "1px solid var(--border-strong)" }}>{t}</span>)}
-                      </div>
-                      <div style={{ display: "flex", gap: 12 }}>
-                        {p.github !== "#" && (
-                          <a href={p.github} target="_blank" rel="noopener noreferrer"
-                            style={{ fontSize: 10, color: "var(--text-faint)", display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "color 0.2s" }}
-                            onMouseEnter={e => e.currentTarget.style.color = "var(--text-primary)"}
-                            onMouseLeave={e => e.currentTarget.style.color = "var(--text-faint)"}>
-                            <Github size={10} /> Code
+              </Reveal>
+
+              {/* Projects mini-grid */}
+              <Reveal>
+                <div style={{ ...card, padding: "13px 15px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Projects</div>
+                    <button onClick={() => open("projects")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                      All <ArrowUpRight size={9} />
+                    </button>
+                  </div>
+                  <div style={projMiniGridStyle}>
+                    {projects.map((p, i) => (
+                      <div key={i}
+                        style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderTop: `2px solid ${p.accent}`, borderRadius: 9, padding: "12px", transition: "transform 0.2s, border-color 0.2s", cursor: "default" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.borderColor = p.accent; }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLDivElement).style.transform = ""; // ← empty string, not "translateY(0)"
+                          (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-subtle)";
+                        }}>
+                        <div style={{ fontSize: 8, letterSpacing: 2, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 4, fontFamily: "'JetBrains Mono',monospace" }}>{p.tag}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 5, fontFamily: "'Playfair Display',serif" }}>{p.title}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-ghost)", lineHeight: 1.5, marginBottom: 8 }}>{p.description.slice(0, 85)}…</div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 9 }}>
+                          {p.tech.slice(0, 3).map(t => <span key={t} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 8, fontFamily: "'JetBrains Mono',monospace", background: "var(--bg-hover)", color: "var(--text-ghost)", border: "1px solid var(--border-strong)" }}>{t}</span>)}
+                        </div>
+                        <div style={{ display: "flex", gap: 12 }}>
+                          {p.github !== "#" && (
+                            <a href={p.github} target="_blank" rel="noopener noreferrer"
+                              style={{ fontSize: 10, color: "var(--text-faint)", display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "color 0.2s" }}
+                              onMouseEnter={e => e.currentTarget.style.color = "var(--text-primary)"}
+                              onMouseLeave={e => e.currentTarget.style.color = "var(--text-faint)"}>
+                              <Github size={10} /> Code
+                            </a>
+                          )}
+                          <a href={p.demo} target="_blank" rel="noopener noreferrer"
+                            style={{ fontSize: 10, color: p.accent, display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "opacity 0.2s" }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
+                            onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                            <ExternalLink size={10} /> Demo
                           </a>
-                        )}
-                        <a href={p.demo} target="_blank" rel="noopener noreferrer"
-                          style={{ fontSize: 10, color: p.accent, display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "opacity 0.2s" }}
-                          onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
-                          onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-                          <ExternalLink size={10} /> Demo
-                        </a>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </Reveal>
+              </Reveal>
 
-            {/* Interest tiles */}
-            <Reveal>
-              <div style={{ ...card, padding: "13px 15px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>The Human Section</div>
-                  <button onClick={() => open("interests")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
-                    Interests &amp; Fun <ArrowUpRight size={9} />
-                  </button>
+              {/* Interest tiles */}
+              <Reveal>
+                <div style={{ ...card, padding: "13px 15px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>The Human Section</div>
+                    <button onClick={() => open("interests")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                      Interests &amp; Fun <ArrowUpRight size={9} />
+                    </button>
+                  </div>
+                  <div style={tileGridStyle}>
+                    {interestTiles.map((tile, i) => (
+                      <div key={i} onClick={() => open("interests")}
+                        style={{ background: hoveredTile === i ? tileBg(tile.bg) : "var(--bg-card-inner)", border: `1px solid ${hoveredTile === i ? tile.color + "45" : "var(--border-subtle)"}`, borderRadius: 9, padding: "11px 9px", cursor: "pointer", transition: "all 0.2s", transform: hoveredTile === i ? "translateY(-2px)" : undefined }}
+                        onMouseEnter={() => setHoveredTile(i)} onMouseLeave={() => setHoveredTile(null)}>
+                        <div style={{ fontSize: 17, marginBottom: 5, color: hoveredTile === i ? tile.color : "var(--text-faint)", transition: "color 0.2s" }}>{tile.icon}</div>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: hoveredTile === i ? tile.color : "var(--text-muted)", marginBottom: 2, transition: "color 0.2s" }}>{tile.label}</div>
+                        <div style={{ fontSize: 8, color: "var(--text-dead)", lineHeight: 1.4 }}>{tile.sub}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div style={tileGridStyle}>
-                  {interestTiles.map((tile, i) => (
-                    <div key={i} onClick={() => open("interests")}
-                      style={{ background: hoveredTile === i ? tileBg(tile.bg) : "var(--bg-card-inner)", border: `1px solid ${hoveredTile === i ? tile.color + "45" : "var(--border-subtle)"}`, borderRadius: 9, padding: "11px 9px", cursor: "pointer", transition: "all 0.2s", transform: hoveredTile === i ? "translateY(-2px)" : undefined }}
-                      onMouseEnter={() => setHoveredTile(i)} onMouseLeave={() => setHoveredTile(null)}>
-                      <div style={{ fontSize: 17, marginBottom: 5, color: hoveredTile === i ? tile.color : "var(--text-faint)", transition: "color 0.2s" }}>{tile.icon}</div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: hoveredTile === i ? tile.color : "var(--text-muted)", marginBottom: 2, transition: "color 0.2s" }}>{tile.label}</div>
-                      <div style={{ fontSize: 8, color: "var(--text-dead)", lineHeight: 1.4 }}>{tile.sub}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
+              </Reveal>
 
-            {/* ══ CONTACT ══ */}
-            <section id="contact" style={{ padding: "clamp(36px,6vw,56px) clamp(16px,4vw,20px)", background: "var(--contact-bg)", borderTop: "1px solid var(--border-subtle)", }}>
-              <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-                <div style={{ fontSize: 9, letterSpacing: 4, textTransform: "uppercase", color: "var(--text-faint)", fontWeight: 700, marginBottom: 12 }}>CONTACT</div>
-                <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,6vw,44px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-1.5px", marginBottom: 12, lineHeight: 1.1 }}>
-                  Let&apos;s build<br /><span style={{ color: "var(--accent)", fontStyle: "italic" }}>something together</span>
-                </h2>
-                <p style={{ fontSize: "clamp(12px,1.5vw,13px)", color: "var(--text-faint)", lineHeight: 1.8, marginBottom: 28 }}>Open to internship opportunities, collaborations, and interesting conversations.</p>
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24, flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center" }}>
-                  <a href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
-                    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "var(--accent)", color: isLight ? "#fff" : "#0a0908", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
-                    <Mail size={13} /> Send a message
-                  </a>
-                  <a href="https://www.facebook.com/ralph.santos.620659/"
-                    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "transparent", color: "var(--text-muted)", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "1px solid var(--border-strong)", fontFamily: "inherit" }}>
-                    <Facebook size={13} /> Facebook
-                  </a>
+              {/* ══ CONTACT ══ */}
+              <section id="contact" style={{ padding: "clamp(36px,6vw,56px) clamp(16px,4vw,20px)", background: "var(--contact-bg)", borderTop: "1px solid var(--border-subtle)", borderRadius: 9 }}>
+                <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
+                  <div style={{ fontSize: 9, letterSpacing: 4, textTransform: "uppercase", color: "var(--text-faint)", fontWeight: 700, marginBottom: 12 }}>CONTACT</div>
+                  <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,6vw,44px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-1.5px", marginBottom: 12, lineHeight: 1.1 }}>
+                    Let&apos;s build<br /><span style={{ color: "var(--accent)", fontStyle: "italic" }}>something together</span>
+                  </h2>
+                  <p style={{ fontSize: "clamp(12px,1.5vw,13px)", color: "var(--text-faint)", lineHeight: 1.8, marginBottom: 28 }}>Open to internship opportunities, collaborations, and interesting conversations.</p>
+                  <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24, flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center" }}>
+                    <a href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "var(--accent)", color: isLight ? "#fff" : "#0a0908", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
+                      <Mail size={13} /> Send a message
+                    </a>
+                    <a href="https://www.facebook.com/ralph.santos.620659/"
+                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "transparent", color: "var(--text-muted)", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "1px solid var(--border-strong)", fontFamily: "inherit" }}>
+                      <Facebook size={13} /> Facebook
+                    </a>
+                  </div>
+                  <p style={{ color: "var(--text-ghost)", fontSize: 11, borderTop: "1px solid var(--border-subtle)", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
                 </div>
-                <p style={{ color: "var(--text-ghost)", fontSize: 11, borderTop: "1px solid var(--border-subtle)", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
-              </div>
-            </section>
+              </section>
 
-            <div style={{ textAlign: "center", padding: "20px 0 8px", borderTop: "1px solid var(--border-subtle)" }}>
-              <p style={{ color: "var(--text-dead)", fontSize: 11 }}>© 2025 Ralph Geo Santos</p>
+              <div style={{ textAlign: "center", padding: "20px 0 8px", borderTop: "1px solid var(--border-subtle)" }}>
+                <p style={{ color: "var(--text-dead)", fontSize: 11 }}>© 2025 Ralph Geo Santos</p>
+              </div>
             </div>
+
+
+
+
 
           </div>
         </div>

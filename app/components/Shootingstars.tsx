@@ -40,7 +40,7 @@ export default function ShootingStars() {
     window.addEventListener("resize", resize);
 
     /* ── DARK: white twinkling stars + meteor trails ── */
-    const darkStars: Star[] = Array.from({ length: 500 }, () => ({
+    const darkStars: Star[] = Array.from({ length: 300 }, () => ({
       x: Math.random(), y: Math.random(),
       size: Math.random() * 1.2 + 0.2,
       opacity: Math.random() * 0.5 + 0.1,
@@ -66,7 +66,7 @@ export default function ShootingStars() {
        Same structure as dark mode, just different colors.
        Stars are teal dots scattered across the full canvas,
        slowly twinkling — mirrors the dark mode feel exactly.   */
-    const lightStars: Star[] = Array.from({ length: 500 }, () => ({
+    const lightStars: Star[] = Array.from({ length: 300 }, () => ({
       x: Math.random(), y: Math.random(),
       size: Math.random() * 1.8 + 0.4,          /* slightly bigger than dark */
       opacity: Math.random() * 0.45 + 0.15,      /* more visible against light bg */
