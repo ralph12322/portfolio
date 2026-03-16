@@ -37,15 +37,28 @@ a { text-decoration: none; }
 
 /* ─── Panel drawer ─── */
 .panel-drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 1000;
+  position: fixed; top: 0; right: -100%; bottom: 0; z-index: 999;
   width: min(96vw, 1100px);
   background: var(--bg-card);
   border-left: 1px solid var(--border-default);
-  display: flex; flex-direction: column; overflow: hidden;
-  
-  /* REMOVE transform, use right instead */
-  right: -100%;
   transition: right 0.5s cubic-bezier(0.77,0,0.175,1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+
+.panel-drawer.open {
+  right: 0;
+}
+
+.right-col-fade {
+  pointer-events: none;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 10;
+  background: linear-gradient(to bottom, var(--bg-page), transparent);
+  transition: opacity 0.4s;
 }
 
 .panel-drawer.open {

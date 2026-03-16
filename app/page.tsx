@@ -6,6 +6,7 @@ import {
   GitPullRequest, Star, Zap, Code2, Layers, Database,
   Terminal, CheckCircle2, Instagram, Clapperboard, SquareChevronRight,
 } from "lucide-react";
+import { createPortal } from "react-dom";
 import Navbar from "./components/Navbar";
 import MusicPlayer from "./components/MusicPlayer";
 import SkillsBubble from "./components/SkillCarousel";
@@ -65,14 +66,21 @@ function Reveal({ children, style = {} }: { children: ReactNode; delay?: number;
 }
 
 function Panel({ open, onClose, children }: PanelProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
-  return (
+
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 998, background: "rgba(0,0,0,0.6)", opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none", transition: "opacity 0.35s", backdropFilter: open ? "blur(6px)" : "none" }} />
-      <div className="panel-drawer" style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}>
+      <div className={`panel-drawer ${open ? "open" : ""}`}>
         {children}
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
@@ -324,6 +332,9 @@ export default function Portfolio() {
                 </div>
               </div>
             </Reveal>
+            <Reveal>
+              <SpotifyWidget />
+            </Reveal>
 
             {/* Skills */}
             <div style={{ minWidth: 0, width: "100%" }}>
@@ -348,10 +359,6 @@ export default function Portfolio() {
                   </a>
                 ))}
               </div>
-            </Reveal>
-
-            <Reveal>
-              <SpotifyWidget />
             </Reveal>
           </div>
 
