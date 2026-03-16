@@ -514,7 +514,7 @@ export default function Portfolio() {
               <Reveal>
                 <div style={{ ...card, padding: "13px 15px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>The Human Section</div>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Thing I'm Interested</div>
                     <button onClick={() => open("interests")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
                       Interests &amp; Fun <ArrowUpRight size={9} />
                     </button>
