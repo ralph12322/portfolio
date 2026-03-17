@@ -71,7 +71,7 @@ export default function SkillsBubble({ skills = DEFAULT_SKILLS }: SkillsBubblePr
         @keyframes sb-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
         @keyframes sb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,0.35)}50%{box-shadow:0 0 0 8px rgba(45,212,191,0)}}
         @keyframes sb-tag-pop{from{opacity:0;transform:scale(0.75) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
-        .sb-track{animation:sb-scroll 18s linear infinite}
+        .sb-track{animation:sb-scroll 30s linear infinite}
         .sb-track:hover{animation-play-state:paused}
         .sb-bubble-btn{animation:sb-pulse 3s ease-in-out infinite;transition:transform 0.18s,background 0.18s}
         .sb-bubble-btn:hover{transform:scale(1.07) !important;animation:none;box-shadow:none}

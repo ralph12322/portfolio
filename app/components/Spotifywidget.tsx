@@ -28,7 +28,7 @@ export default function SpotifyWidget() {
                 .catch(() => { })
                 .finally(() => setLoading(false));
         fetchData();
-        const id = setInterval(fetchData, 30000);
+        const id = setInterval(fetchData, 3000); 
         return () => clearInterval(id);
     }, []);
 

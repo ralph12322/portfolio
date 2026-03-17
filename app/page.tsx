@@ -2,8 +2,8 @@
 import { useState, useEffect, ReactNode } from "react";
 import {
   Github, Linkedin, Mail, Facebook, ExternalLink,
-  Music, Film, Gamepad2, X, ArrowUpRight, GitCommit,
-  GitPullRequest, Star, Zap, Code2, Layers, Database,
+  Music, Film, Gamepad2, X, ArrowUpRight,
+  Zap, Code2, Layers, Database,
   Terminal, CheckCircle2, Instagram, Clapperboard, SquareChevronRight,
 } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -12,7 +12,6 @@ import MusicPlayer from "./components/MusicPlayer";
 import SkillsBubble from "./components/SkillCarousel";
 import ShootingStars from "./components/Shootingstars";
 import { useTheme } from "./components/Themeprovider";
-import { useRef } from "react";
 import SpotifyWidget from "./components/Spotifywidget";
 
 interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
@@ -50,32 +49,32 @@ function GitHubStats({ username }: { username: string }) {
       });
   }, [username]);
   return (
-    <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+    <div className="flex gap-2 mb-2.5">
       {[{ label: "PUBLIC REPOS", value: repos }, { label: "CONTRIBUTIONS", value: contributions }].map((s, i) => (
-        <div key={i} style={{ flex: 1, background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "9px 11px" }}>
-          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: "#ffff", marginBottom: 3, fontFamily: "'JetBrains Mono', monospace" }}>{s.label}</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-1px" }}>{s.value}</div>
+        <div key={i} className="flex-1 bg-[var(--bg-card-inner)] border border-[var(--border-subtle)] rounded-lg p-[9px_11px]">
+          <div className="text-[8px] font-bold tracking-[2px] text-white mb-[3px] font-mono">{s.label}</div>
+          <div className="text-xl font-bold text-[var(--accent)] font-mono tracking-[-1px]">{s.value}</div>
         </div>
       ))}
     </div>
   );
 }
 
-function Reveal({ children, style = {} }: { children: ReactNode; delay?: number; style?: React.CSSProperties }) {
-  return <div style={{ minWidth: 0, ...style }}>{children}</div>;
+function Reveal({ children, style = {} }: { children: ReactNode; style?: React.CSSProperties }) {
+  return <div className="min-w-0" style={style}>{children}</div>;
 }
 
 function Panel({ open, onClose, children }: PanelProps) {
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
-
   if (!mounted) return null;
-
   return createPortal(
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 998, background: "rgba(0,0,0,0.6)", opacity: open ? 1 : 0, pointerEvents: open ? "auto" : "none", transition: "opacity 0.35s", backdropFilter: open ? "blur(6px)" : "none" }} />
+      <div
+        onClick={onClose}
+        className={`fixed inset-0 z-[998] bg-black/60 transition-opacity duration-[350ms] ${open ? "opacity-100 pointer-events-auto backdrop-blur-md" : "opacity-0 pointer-events-none"}`}
+      />
       <div className={`panel-drawer ${open ? "open" : ""}`}>
         {children}
       </div>
@@ -86,15 +85,15 @@ function Panel({ open, onClose, children }: PanelProps) {
 
 function PanelHeader({ label, title, italic, onClose }: PanelHeaderProps) {
   return (
-    <div style={{ padding: "clamp(14px,3vw,36px) clamp(14px,4vw,48px) 18px", borderBottom: "1px solid var(--border-default)", flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: "var(--text-faint)", fontWeight: 700, marginBottom: 8 }}>{label}</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(20px,4vw,44px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-1px", margin: 0, lineHeight: 1.1 }}>
-          {title}{italic && <span style={{ color: "var(--accent)", fontStyle: "italic" }}> {italic}</span>}
+    <div className="px-[clamp(14px,4vw,48px)] pt-[clamp(14px,3vw,36px)] pb-[18px] border-b border-[var(--border-default)] flex-shrink-0 flex justify-between items-start">
+      <div className="min-w-0 flex-1">
+        <div className="text-[10px] tracking-[4px] uppercase text-[var(--text-faint)] font-bold mb-2">{label}</div>
+        <h2 className="font-serif text-[clamp(20px,4vw,44px)] font-bold text-[var(--text-primary)] tracking-[-1px] m-0 leading-[1.1]">
+          {title}{italic && <span className="text-[var(--accent)] italic"> {italic}</span>}
         </h2>
       </div>
       <button className="close-btn" onClick={onClose} aria-label="Close panel">
-        <X style={{ width: 16, height: 16, color: "var(--text-muted)" }} />
+        <X className="w-4 h-4 text-[var(--text-muted)]" />
       </button>
     </div>
   );
@@ -106,32 +105,18 @@ function LiveClock() {
     const tick = () => setTime(new Date().toLocaleTimeString("en-US", { hour12: false }));
     tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
   }, []);
-  return <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "var(--text-muted)", letterSpacing: 1 }}>{time}</span>;
+  return <span className="font-mono text-xs text-[var(--text-muted)] tracking-wide">{time}</span>;
 }
 
 function VisitorCount() {
-  const [count, setCount] = useState<string | null>(null);
-  const fetched = useRef(false);
-
-  useEffect(() => {
-    if (fetched.current) return;
-    fetched.current = true;
-
-    fetch("https://api.visitorbadge.io/api/visitors?path=github.com%2Fralph12322")
-      .then(r => r.text())
-      .then(svg => {
-        const match = svg.match(/<text[^>]*font-weight="bold">(\d+)<\/text>/);
-        setCount(match ? Number(match[1]).toLocaleString() : "—");
-      })
-      .catch(() => setCount("—"));
-  }, []);
-
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-      <div style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--accent)", flexShrink: 0, animation: "pulse 2s infinite" }} />
-      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "var(--text-muted)", letterSpacing: 1 }}>
-        {count ?? "…"} visitors
-      </span>
+    <div className="inline-flex items-center gap-[5px]">
+      <div className="w-[5px] h-[5px] rounded-full bg-[var(--accent)] flex-shrink-0 animate-pulse" />
+      <img
+        src="https://api.visitorbadge.io/api/visitors?path=github.com%2Fralph12322&labelColor=%23000000&countColor=%232dd4bf&style=flat"
+        alt="visitors"
+        className="h-4"
+      />
     </div>
   );
 }
@@ -151,9 +136,9 @@ const timeline: TimelineItem[] = [
 ];
 
 const interests: Interest[] = [
-  { category: "Music", icon: <Music style={{ width: 18, height: 18 }} />, accent: "#2dd4bf", description: "Music is woven into my day — OPM when I need to feel something, lo-fi when I need to focus.", items: [{ label: "OPM / Filipino Music", sub: "Ben&Ben, IV of Spades, Cup of Joe, SB19" }, { label: "Lo-fi / Chill", sub: "Late-night coding sessions and deep focus" }, { label: "Bedroom Pop", sub: "Soft, dreamy vibes for any mood" }, { label: "Acoustic Sets", sub: "Raw, stripped-back and emotional" }] },
-  { category: "Film & Shows", icon: <Film style={{ width: 18, height: 18 }} />, accent: "#14b8a6", description: "A good story gets me every time — emotional anime arcs, slow-burn romances, high-stakes thrillers.", items: [{ label: "Anime", sub: "AOT, Haikyuu, Vinland Saga, Demon Slayer" }, { label: "Romance / Drama", sub: "Kilig moments and emotional gut punches" }, { label: "Action / Thriller", sub: "Edge-of-seat tension and satisfying payoffs" }, { label: "Slice of Life", sub: "Calm, relatable, oddly comforting" }] },
-  { category: "Gaming", icon: <Gamepad2 style={{ width: 18, height: 18 }} />, accent: "#5eead4", description: "My go-to unwind — anything with a great story or competitive depth, mobile or PC.", items: [{ label: "Story-Driven RPGs", sub: "Deep lore and memorable characters" }, { label: "Battle Royale / FPS", sub: "When it's time to go sweaty mode" }, { label: "Indie Gems", sub: "Surprising, creative, underrated finds" }, { label: "Mobile Games", sub: "Quick sessions on the go" }] }
+  { category: "Music", icon: <Music className="w-[18px] h-[18px]" />, accent: "#2dd4bf", description: "Music is woven into my day — OPM when I need to feel something, lo-fi when I need to focus.", items: [{ label: "OPM / Filipino Music", sub: "Ben&Ben, IV of Spades, Cup of Joe, SB19" }, { label: "Lo-fi / Chill", sub: "Late-night coding sessions and deep focus" }, { label: "Bedroom Pop", sub: "Soft, dreamy vibes for any mood" }, { label: "Acoustic Sets", sub: "Raw, stripped-back and emotional" }] },
+  { category: "Film & Shows", icon: <Film className="w-[18px] h-[18px]" />, accent: "#14b8a6", description: "A good story gets me every time — emotional anime arcs, slow-burn romances, high-stakes thrillers.", items: [{ label: "Anime", sub: "AOT, Haikyuu, Vinland Saga, Demon Slayer" }, { label: "Romance / Drama", sub: "Kilig moments and emotional gut punches" }, { label: "Action / Thriller", sub: "Edge-of-seat tension and satisfying payoffs" }, { label: "Slice of Life", sub: "Calm, relatable, oddly comforting" }] },
+  { category: "Gaming", icon: <Gamepad2 className="w-[18px] h-[18px]" />, accent: "#5eead4", description: "My go-to unwind — anything with a great story or competitive depth, mobile or PC.", items: [{ label: "Story-Driven RPGs", sub: "Deep lore and memorable characters" }, { label: "Battle Royale / FPS", sub: "When it's time to go sweaty mode" }, { label: "Indie Gems", sub: "Surprising, creative, underrated finds" }, { label: "Mobile Games", sub: "Quick sessions on the go" }] }
 ];
 
 const skills: Record<string, { label: string; icon: ReactNode }[]> = {
@@ -188,14 +173,6 @@ export default function Portfolio() {
   const { theme } = useTheme();
   const isLight = theme === "light";
 
-  /* card style uses CSS vars so it flips automatically */
-  const card: React.CSSProperties = {
-    background: "var(--bg-card)",
-    border: "1px solid var(--border-default)",
-    borderRadius: 12,
-    overflow: "hidden",
-  };
-
   const scrollTo = (id: string) => { document.querySelector(id)?.scrollIntoView({ behavior: "smooth" }); setActiveNav("Contact"); };
   const open = (name: string) => { setPanel(name); setActiveNav(name.charAt(0).toUpperCase() + name.slice(1)); };
   const close = () => { setPanel(null); setActiveNav(null); };
@@ -208,141 +185,96 @@ export default function Portfolio() {
     { label: "Contact", action: () => scrollTo("#contact") },
   ];
 
-  /* ── Layout styles ── */
-  const rootGridStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr" : isTablet ? "220px 1fr" : "300px 1fr",
-    gap: isMobile ? 10 : 12,
-    alignItems: "start",
-  };
-
-  const colLeftStyle: React.CSSProperties = {
-    display: "flex", flexDirection: "column", gap: 10, minWidth: 0, width: "100%",
-    ...(isDesktop
-      ? { position: "sticky", top: 78, maxHeight: "calc(100vh - 92px)", overflowY: "auto", scrollbarWidth: "none" as const }
-      : { position: "static", maxHeight: "none", overflowY: "visible" }),
-
-  };
-
-  const photoCardStyle: React.CSSProperties = {
-    ...card, position: "relative",
-    ...(isMobile ? { height: "56vw", minHeight: 220, maxHeight: 340 } : { aspectRatio: "3/3.8" }),
-  };
-
-  const midRowStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile || isTablet ? "1fr" : "1fr 1fr",
-    gap: 12,
-  };
-
-  const projMiniGridStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)",
-    gap: 10,
-  };
-
-  const tileGridStyle: React.CSSProperties = {
-    display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8,
-  };
-
-  const panelAboutGridStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-    gap: isMobile ? 24 : 40, alignItems: "start",
-  };
-
-  const panelInterestsGridStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-    gap: isMobile ? 20 : 40, alignItems: "start",
-  };
-
-  const panelProjRowStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr" : "52px 1fr auto",
-    gap: isMobile ? 10 : 20, padding: "22px 0",
-    borderBottom: "1px solid var(--border-default)",
-    alignItems: "start", transition: "opacity 0.2s",
-  };
-
-  const panelExpRowStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr" : "88px 1fr",
-    gap: isMobile ? 6 : 20, padding: "20px 0",
-    borderBottom: "1px solid var(--border-default)",
-    transition: "opacity 0.2s",
-  };
-
-  /* Light-mode tile bg is a warm tinted surface instead of dark green */
   const tileBg = (darkBg: string) => isLight ? "var(--bg-hover)" : darkBg;
 
   return (
-    <div style={{ fontFamily: "'Sora', sans-serif", background: "var(--bg-page)", color: "var(--text-secondary)", minHeight: "100vh", }}>
+    <div className="font-sans bg-[var(--bg-page)] text-[var(--text-secondary)] min-h-screen">
       <ShootingStars />
       <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
       <Navbar navItems={navItems} activeNav={activeNav} />
 
       {/* Spacer */}
-      <div style={{ paddingTop: 64, background: "var(--bg-page)", }} />
+      <div className="pt-16 bg-[var(--bg-page)]" />
 
-      <main style={{ maxWidth: 1380, margin: "0 auto", padding: isMobile ? "12px 10px 0" : "14px clamp(10px,3vw,16px) 0" }}>
-        <div style={rootGridStyle}>
+      <main className={`max-w-[1380px] mx-auto ${isMobile ? "px-[10px] pt-3" : "px-[clamp(10px,3vw,16px)] pt-[14px]"}`}>
+        {/* Root grid */}
+        <div
+          className="grid items-start gap-[10px] md:gap-3"
+          style={{
+            gridTemplateColumns: isMobile ? "1fr" : isTablet ? "220px 1fr" : "300px 1fr",
+          }}
+        >
 
           {/* ══ LEFT COLUMN ══ */}
-          <div style={colLeftStyle}>
+          <div
+            className="flex flex-col gap-[10px] min-w-0 w-full"
+            style={isDesktop ? { position: "sticky", top: 78, maxHeight: "calc(100vh - 92px)", overflowY: "auto", scrollbarWidth: "none" } : {}}
+          >
 
             {/* Photo card */}
-            <div style={photoCardStyle}>
-              <img src="./heroMe.jfif" alt="Ralph Geo Santos" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} />
-              <div style={{ position: "absolute", top: 10, left: 10, right: 10, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
-                <LiveClock /><VisitorCount />
+            <div
+              className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden relative"
+              style={isMobile ? { height: "56vw", minHeight: 220, maxHeight: 340 } : { aspectRatio: "3/3.8" }}
+            >
+              <img
+                src="./heroMe.jfif"
+                alt="Ralph Geo Santos"
+                className="w-full h-full object-cover object-top block"
+              />
+              {/* Top bar */}
+              <div className="absolute top-[10px] left-[10px] right-[10px] flex justify-between items-center flex-wrap gap-1">
+                <LiveClock /> <VisitorCount/>
               </div>
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "55%", background: "linear-gradient(to top,var(--bg-card),transparent)", pointerEvents: "none" }} />
-              <div style={{ position: "absolute", bottom: 14, left: 16, right: 16 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "var(--accent)", fontFamily: "'JetBrains Mono',monospace", marginBottom: 5, display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--accent)", animation: "pulse 2s infinite", flexShrink: 0 }} />
+              {/* Gradient overlay */}
+              <div className="absolute bottom-0 left-0 right-0 h-[55%] bg-gradient-to-t from-[var(--bg-card)] to-transparent pointer-events-none" />
+              {/* Name / title */}
+              <div className="absolute bottom-[14px] left-4 right-4">
+                <div className="text-[10px] font-bold tracking-[2px] uppercase text-[var(--accent)] font-mono mb-[5px] flex items-center gap-[6px]">
+                  <div className="w-[5px] h-[5px] rounded-full bg-[var(--accent)] animate-pulse flex-shrink-0" />
                   Open to Opportunities
                 </div>
-                <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(18px,3vw,26px)", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.2, letterSpacing: "-0.5px" }}>
-                  Ralph Geo <span style={{ color: "var(--accent)", fontStyle: "italic" }}>Santos</span>
+                <h1 className="font-serif text-[clamp(18px,3vw,26px)] font-bold text-[var(--text-primary)] leading-[1.2] tracking-[-0.5px]">
+                  Ralph Geo <span className="text-[var(--accent)] italic">Santos</span>
                 </h1>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>4th Year CS · Full-Stack Developer</div>
+                <div className="text-[11px] text-[var(--text-muted)] mt-[3px]">4th Year CS · Full-Stack Developer</div>
               </div>
             </div>
 
             {/* Blurb */}
             <Reveal>
-              <div style={{ ...card, padding: "13px 14px" }}>
-                <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "var(--text-muted)", lineHeight: 1.75 }}>
-                  A Philippines-based <span style={{ color: "var(--accent)", fontWeight: 600 }}>4th-year CS student</span> building scalable web apps — from price trackers to music platforms. MERN stack is my comfort zone.
+              <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_14px]">
+                <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75]">
+                  A Philippines-based <span className="text-[var(--accent)] font-semibold">4th-year CS student</span> building scalable web apps — from price trackers to music platforms. MERN stack is my comfort zone.
                 </p>
               </div>
             </Reveal>
 
             {/* Role badge */}
             <Reveal>
-              <div style={{ ...card, padding: "11px 13px", display: "flex", alignItems: "center", gap: 11 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 9, background: "var(--bg-hover)", border: "1px solid var(--border-strong)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[11px_13px] flex items-center gap-[11px]">
+                <div className="w-[34px] h-[34px] rounded-[9px] bg-[var(--bg-hover)] border border-[var(--border-strong)] flex items-center justify-center flex-shrink-0">
                   <Layers size={15} color="var(--accent)" />
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 1 }}>Fullstack Dev Intern</div>
-                  <div style={{ fontSize: 10, color: "var(--text-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Jurisprudence Application Services</div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[var(--text-primary)] mb-[1px]">Fullstack Dev Intern</div>
+                  <div className="text-[10px] text-[var(--text-faint)] overflow-hidden text-ellipsis whitespace-nowrap">Jurisprudence Application Services</div>
                 </div>
               </div>
             </Reveal>
+
             <Reveal>
               <SpotifyWidget />
             </Reveal>
 
             {/* Skills */}
-            <div style={{ minWidth: 0, width: "100%" }}>
+            <div className="min-w-0 w-full">
               <SkillsBubble />
             </div>
+
             {/* Socials */}
             <Reveal>
-              <div style={{ ...card, padding: "11px 13px", display: "flex", gap: 6 }}>
+              <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[11px_13px] flex gap-[6px]">
                 {[
                   { href: "https://github.com/ralph12322", icon: <Github size={14} />, label: "GitHub" },
                   { href: "https://www.linkedin.com/in/ralph-geo-santos-49226b281/", icon: <Linkedin size={14} />, label: "LinkedIn" },
@@ -350,61 +282,76 @@ export default function Portfolio() {
                   { href: "https://www.facebook.com/ralph.santos.620659/", icon: <Facebook size={14} />, label: "FB" },
                   { href: "https://www.instagram.com/depapelpluma/?hl=en", icon: <Instagram size={14} />, label: "IG" },
                 ].map((s, i) => (
-                  <a key={i} href={s.href} target="_blank" rel="noopener noreferrer"
-                    style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "7px 3px", background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 8, color: "var(--text-faint)", fontSize: 8, fontWeight: 700, letterSpacing: 0.5, transition: "color 0.2s, border-color 0.2s", minWidth: 0 }}
-                    onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.borderColor = "var(--border-subtle)"; }}>
+                  <a
+                    key={i}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex flex-col items-center gap-1 p-[7px_3px] bg-[var(--bg-card-inner)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-faint)] text-[8px] font-bold tracking-[0.5px] transition-colors duration-200 min-w-0 hover:text-[var(--accent)] hover:border-[var(--accent)]"
+                  >
                     {s.icon}
-                    <span style={{ textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{s.label}</span>
+                    <span className="uppercase overflow-hidden text-ellipsis whitespace-nowrap max-w-full">{s.label}</span>
                   </a>
                 ))}
               </div>
             </Reveal>
-            <div style={{ textAlign: "center", padding: "20px 0 8px", borderTop: "1px solid var(--border-subtle)" }}>
-                <p style={{ color: "#979797", fontSize: 11 }}>© 2025 Ralph Geo Santos</p>
-              </div>
+
+            <div className="text-center py-5 border-t border-[var(--border-subtle)]">
+              <p className="text-[#979797] text-[11px]">© 2025 Ralph Geo Santos</p>
+            </div>
           </div>
 
           {/* ══ RIGHT COLUMN ══ */}
-          <div style={{
-            maxHeight: "calc(100vh - 92px)",
-            overflowY: "auto",
-            scrollbarWidth: "none",
-          }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0, paddingBottom: 48 }}>
+          <div
+            className="min-w-0"
+            style={{ maxHeight: "calc(100vh - 92px)", overflowY: "auto", scrollbarWidth: "none" }}
+          >
+            <div className="flex flex-col gap-3 min-w-0 pb-12">
 
               {/* Tagline */}
               <Reveal>
-                <div style={{ ...card, padding: "clamp(14px,2vw,18px) clamp(14px,2vw,20px)" }}>
-                  <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "var(--text-muted)", lineHeight: 1.75 }}>
-                    Building at the intersection of <span style={{ color: "var(--accent)", fontWeight: 600 }}>full-stack engineering</span>, clean UI, and <span style={{ color: "var(--accent-dim)", fontWeight: 600 }}>developer experience</span> — crafting apps that are fast, scalable, and genuinely useful.
+                <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[clamp(14px,2vw,18px)_clamp(14px,2vw,20px)]">
+                  <p className="text-[clamp(12px,1.4vw,16px)] text-[var(--text-muted)] leading-[1.75]">
+                    Building at the intersection of <span className="text-[var(--accent)] font-semibold">full-stack engineering</span>, clean UI, and <span className="text-[var(--accent-dim)] font-semibold">developer experience</span> — crafting apps that are fast, scalable, and genuinely useful.
                   </p>
                 </div>
               </Reveal>
 
               {/* Experience + Roadmap */}
-              <div style={midRowStyle}>
+              <div
+                className="grid gap-3"
+                style={{ gridTemplateColumns: isMobile || isTablet ? "1fr" : "1fr 1fr" }}
+              >
+                {/* Experience mini */}
                 <Reveal>
-                  <div style={{ ...card, padding: "15px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Experience</div>
-                      <button onClick={() => open("experience")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>Full <ArrowUpRight size={9} /></button>
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[15px]">
+                    <div className="flex justify-between items-center mb-[14px]">
+                      <div className="text-[9px] font-bold tracking-[3px] uppercase text-[var(--text-faint)]">Experience</div>
+                      <button
+                        onClick={() => open("experience")}
+                        className="text-[9px] text-[var(--accent)] bg-transparent border-none cursor-pointer font-bold flex items-center gap-[2px] tracking-wide uppercase flex-shrink-0 font-sans"
+                      >
+                        Full <ArrowUpRight size={9} />
+                      </button>
                     </div>
-                    <div style={{ position: "relative" }}>
-                      <div style={{ position: "absolute", left: 6, top: 8, bottom: 8, width: 1, background: "var(--border-default)" }} />
+                    <div className="relative">
+                      <div className="absolute left-[6px] top-2 bottom-2 w-px bg-[var(--border-default)]" />
                       {[
                         { period: "2026–Now", title: "Fullstack Dev Intern", co: "Jurisprudence App. Services", accent: "#2dd4bf" },
                         { period: "2025", title: "Thesis Defense", co: "University · TrackTag", accent: "#99f6e4" },
                         { period: "2022–26", title: "B.S. Computer Science", co: "University", accent: "#0d9488" },
                       ].map((item, i) => (
-                        <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 1fr", gap: 9, marginBottom: i < 2 ? 13 : 0 }}>
-                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 2, position: "relative" }}>
-                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: item.accent, border: "2px solid var(--bg-page)", boxShadow: `0 0 0 2px ${item.accent}25`, flexShrink: 0 }} />
+                        <div key={i} className="grid gap-[9px] mb-[13px] last:mb-0" style={{ gridTemplateColumns: "18px 1fr" }}>
+                          <div className="flex justify-center pt-[2px] relative">
+                            <div
+                              className="w-3 h-3 rounded-full border-2 border-[var(--bg-page)] flex-shrink-0"
+                              style={{ background: item.accent, boxShadow: `0 0 0 2px ${item.accent}25` }}
+                            />
                           </div>
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 9, color: "#ffff", fontFamily: "'JetBrains Mono',monospace", marginBottom: 2 }}>{item.period}</div>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 1 }}>{item.title}</div>
-                            <div style={{ fontSize: 10, color: item.accent, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.co}</div>
+                          <div className="min-w-0">
+                            <div className="text-[9px] text-white font-mono mb-[2px]">{item.period}</div>
+                            <div className="text-xs font-bold text-[var(--text-primary)] mb-[1px]">{item.title}</div>
+                            <div className="text-[10px] overflow-hidden text-ellipsis whitespace-nowrap" style={{ color: item.accent }}>{item.co}</div>
                           </div>
                         </div>
                       ))}
@@ -412,34 +359,35 @@ export default function Portfolio() {
                   </div>
                 </Reveal>
 
+                {/* Roadmap */}
                 <Reveal>
-                  <div style={{ ...card, padding: "15px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Journey Roadmap</div>
-                      <span style={{ fontSize: 9, color: "#ffff", fontStyle: "italic", fontFamily: "'Playfair Display',serif", flexShrink: 0 }}>Aspirational</span>
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[15px]">
+                    <div className="flex justify-between items-center mb-[14px]">
+                      <div className="text-[9px] font-bold tracking-[3px] uppercase text-[var(--text-faint)]">Journey Roadmap</div>
+                      <span className="text-[9px] text-white italic font-serif flex-shrink-0">Aspirational</span>
                     </div>
-                    <div style={{ position: "relative", paddingLeft: 8 }}>
-                      <div style={{ position: "absolute", left: 8, top: 5, bottom: 5, width: 2, background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)", borderRadius: 2, opacity: 0.3 }} />
+                    <div className="relative pl-2">
+                      <div className="absolute left-2 top-[5px] bottom-[5px] w-[2px] rounded-[2px] opacity-30" style={{ background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)" }} />
                       {roadmap.map((step, i) => (
-                        <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr", gap: 7, marginBottom: i < roadmap.length - 1 ? 9 : 0 }}>
-                          <div style={{ display: "flex", justifyContent: "center", paddingTop: 1, position: "relative" }}>
+                        <div key={i} className="grid gap-[7px] mb-[9px] last:mb-0" style={{ gridTemplateColumns: "20px 1fr" }}>
+                          <div className="flex justify-center pt-[1px] relative">
                             {step.status === "done" ? (
-                              <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <div className="w-3 h-3 rounded-full border-2 border-[var(--bg-page)] flex items-center justify-center flex-shrink-0" style={{ background: step.accent }}>
                                 <CheckCircle2 size={6} color="var(--bg-page)" strokeWidth={3} />
                               </div>
                             ) : step.status === "active" ? (
-                              <div style={{ width: 12, height: 12, borderRadius: "50%", background: step.accent, border: "2px solid var(--bg-page)", animation: "roadPulse 2s infinite", flexShrink: 0 }} />
+                              <div className="w-3 h-3 rounded-full border-2 border-[var(--bg-page)] animate-pulse flex-shrink-0" style={{ background: step.accent }} />
                             ) : (
-                              <div style={{ width: 12, height: 12, borderRadius: "50%", background: "transparent", border: `2px solid ${step.accent}30`, flexShrink: 0 }} />
+                              <div className="w-3 h-3 rounded-full bg-transparent flex-shrink-0" style={{ border: `2px solid ${step.accent}30` }} />
                             )}
                           </div>
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 8, fontFamily: "'JetBrains Mono',monospace", color: "#b3b3b3" }}>{step.phase}</div>
-                            <div style={{ fontSize: 11, fontWeight: 700, color: step.status === "future" ? "#ffff" : "var(--text-secondary)" }}>{step.label}</div>
-                            <div style={{ fontSize: 9, color: step.status === "future" ? "#888888" : "#888888" }}>{step.desc}</div>
+                          <div className="min-w-0">
+                            <div className="text-[8px] font-mono text-[#b3b3b3]">{step.phase}</div>
+                            <div className="text-[11px] font-bold" style={{ color: step.status === "future" ? "#fff" : "var(--text-secondary)" }}>{step.label}</div>
+                            <div className="text-[9px] text-[#888]">{step.desc}</div>
                             {step.status === "active" && (
-                              <div style={{ marginTop: 2, display: "inline-flex", alignItems: "center", gap: 3, background: step.accent + "18", padding: "1px 5px", borderRadius: 6, fontSize: 7, fontWeight: 700, color: step.accent, letterSpacing: 1 }}>
-                                <Zap size={6} style={{ animation: "pulse 1.5s infinite" }} /> NOW
+                              <div className="mt-[2px] inline-flex items-center gap-[3px] rounded-[6px] text-[7px] font-bold tracking-wide px-[5px] py-[1px]" style={{ background: step.accent + "18", color: step.accent }}>
+                                <Zap size={6} className="animate-pulse" /> NOW
                               </div>
                             )}
                           </div>
@@ -450,18 +398,23 @@ export default function Portfolio() {
                 </Reveal>
               </div>
 
-              {/* GitHub contributions card */}
+              {/* GitHub contributions */}
               <Reveal>
-                <div style={{ ...card, padding: "13px 15px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>GitHub Contributions</div>
-                    <a href="https://github.com/ralph12322" target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, color: "var(--accent)", fontWeight: 700, display: "flex", alignItems: "center", gap: 3, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_15px]">
+                  <div className="flex justify-between items-center mb-[10px]">
+                    <div className="text-[9px] font-bold tracking-[3px] uppercase text-[var(--text-faint)]">GitHub Contributions</div>
+                    <a
+                      href="https://github.com/ralph12322"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[9px] text-[var(--accent)] font-bold flex items-center gap-[3px] tracking-wide uppercase flex-shrink-0"
+                    >
                       Live <ArrowUpRight size={9} />
                     </a>
                   </div>
                   {isMobile && <GitHubStats username="ralph12322" />}
-                  <div style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderRadius: 7, padding: "8px 6px", marginBottom: 10, overflow: "hidden" }}>
-                    <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" style={{ width: "100%", display: "block", borderRadius: 3 }} />
+                  <div className="bg-[var(--bg-card-inner)] border border-[var(--border-subtle)] rounded-[7px] p-[8px_6px] mb-[10px] overflow-hidden">
+                    <img src="https://ghchart.rshah.org/2dd4bf/ralph12322" alt="GitHub contributions" className="w-full block rounded-[3px]" />
                   </div>
                   <GitHubStats username="ralph12322" />
                 </div>
@@ -469,41 +422,52 @@ export default function Portfolio() {
 
               {/* Projects mini-grid */}
               <Reveal>
-                <div style={{ ...card, padding: "13px 15px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Projects</div>
-                    <button onClick={() => open("projects")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_15px]">
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-[9px] font-bold tracking-[3px] uppercase text-[var(--text-faint)]">Projects</div>
+                    <button
+                      onClick={() => open("projects")}
+                      className="text-[9px] text-[var(--accent)] bg-transparent border-none cursor-pointer font-bold flex items-center gap-[2px] tracking-wide uppercase flex-shrink-0 font-sans"
+                    >
                       All <ArrowUpRight size={9} />
                     </button>
                   </div>
-                  <div style={projMiniGridStyle}>
+                  <div
+                    className="grid gap-[10px]"
+                    style={{ gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)" }}
+                  >
                     {projects.map((p, i) => (
-                      <div key={i}
-                        style={{ background: "var(--bg-card-inner)", border: "1px solid var(--border-subtle)", borderTop: `2px solid ${p.accent}`, borderRadius: 9, padding: "12px", transition: "transform 0.2s, border-color 0.2s", cursor: "default" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLDivElement).style.borderColor = p.accent; }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLDivElement).style.transform = ""; // ← empty string, not "translateY(0)"
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-subtle)";
-                        }}>
-                        <div style={{ fontSize: 8, letterSpacing: 2, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 4, fontFamily: "'JetBrains Mono',monospace" }}>{p.tag}</div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 5, fontFamily: "'Playfair Display',serif" }}>{p.title}</div>
-                        <div style={{ fontSize: 10, color: "#888888", lineHeight: 1.5, marginBottom: 8 }}>{p.description.slice(0, 85)}…</div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 9 }}>
-                          {p.tech.slice(0, 3).map(t => <span key={t} style={{ padding: "2px 5px", borderRadius: 3, fontSize: 8, fontFamily: "'JetBrains Mono',monospace", background: "var(--bg-hover)", color: "#8a8a8a", border: "1px solid var(--border-strong)" }}>{t}</span>)}
+                      <div
+                        key={i}
+                        className="bg-[var(--bg-card-inner)] border border-[var(--border-subtle)] rounded-[9px] p-3 transition-transform duration-200 cursor-default hover:-translate-y-[2px]"
+                        style={{ borderTop: `2px solid ${p.accent}` }}
+                      >
+                        <div className="text-[8px] tracking-[2px] uppercase font-bold mb-1 font-mono" style={{ color: p.accent }}>{p.tag}</div>
+                        <div className="text-[13px] font-bold text-[var(--text-primary)] mb-[5px] font-serif">{p.title}</div>
+                        <div className="text-[10px] text-[#888] leading-[1.5] mb-2">{p.description.slice(0, 85)}…</div>
+                        <div className="flex flex-wrap gap-[3px] mb-[9px]">
+                          {p.tech.slice(0, 3).map(t => (
+                            <span key={t} className="px-[5px] py-[2px] rounded-[3px] text-[8px] font-mono bg-[var(--bg-hover)] text-[#8a8a8a] border border-[var(--border-strong)]">{t}</span>
+                          ))}
                         </div>
-                        <div style={{ display: "flex", gap: 12 }}>
+                        <div className="flex gap-3">
                           {p.github !== "#" && (
-                            <a href={p.github} target="_blank" rel="noopener noreferrer"
-                              style={{ fontSize: 10, color: "var(--text-faint)", display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "color 0.2s" }}
-                              onMouseEnter={e => e.currentTarget.style.color = "var(--text-primary)"}
-                              onMouseLeave={e => e.currentTarget.style.color = "var(--text-faint)"}>
+                            <a
+                              href={p.github}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-[var(--text-faint)] flex items-center gap-[3px] font-semibold transition-colors duration-200 hover:text-[var(--text-primary)]"
+                            >
                               <Github size={10} /> Code
                             </a>
                           )}
-                          <a href={p.demo} target="_blank" rel="noopener noreferrer"
-                            style={{ fontSize: 10, color: p.accent, display: "flex", alignItems: "center", gap: 3, fontWeight: 600, transition: "opacity 0.2s" }}
-                            onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
-                            onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                          <a
+                            href={p.demo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] flex items-center gap-[3px] font-semibold transition-opacity duration-200 hover:opacity-70"
+                            style={{ color: p.accent }}
+                          >
                             <ExternalLink size={10} /> Demo
                           </a>
                         </div>
@@ -515,21 +479,33 @@ export default function Portfolio() {
 
               {/* Interest tiles */}
               <Reveal>
-                <div style={{ ...card, padding: "13px 15px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 11 }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "var(--text-faint)" }}>Thing I'm Interested</div>
-                    <button onClick={() => open("interests")} style={{ fontSize: 9, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: 700, display: "flex", alignItems: "center", gap: 2, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0 }}>
+                <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_15px]">
+                  <div className="flex justify-between items-center mb-[11px]">
+                    <div className="text-[9px] font-bold tracking-[3px] uppercase text-[var(--text-faint)]">Thing I'm Interested</div>
+                    <button
+                      onClick={() => open("interests")}
+                      className="text-[9px] text-[var(--accent)] bg-transparent border-none cursor-pointer font-bold flex items-center gap-[2px] tracking-wide uppercase flex-shrink-0 font-sans"
+                    >
                       Interests &amp; Fun <ArrowUpRight size={9} />
                     </button>
                   </div>
-                  <div style={tileGridStyle}>
+                  <div className="grid grid-cols-2 gap-2">
                     {interestTiles.map((tile, i) => (
-                      <div key={i} onClick={() => open("interests")}
-                        style={{ background: hoveredTile === i ? tileBg(tile.bg) : "var(--bg-card-inner)", border: `1px solid ${hoveredTile === i ? tile.color + "45" : "var(--border-subtle)"}`, borderRadius: 9, padding: "11px 9px", cursor: "pointer", transition: "all 0.2s", transform: hoveredTile === i ? "translateY(-2px)" : undefined }}
-                        onMouseEnter={() => setHoveredTile(i)} onMouseLeave={() => setHoveredTile(null)}>
-                        <div style={{ fontSize: 17, marginBottom: 5, color: hoveredTile === i ? tile.color : "var(--text-faint)", transition: "color 0.2s" }}>{tile.icon}</div>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: hoveredTile === i ? tile.color : "var(--text-primary)", marginBottom: 2, transition: "color 0.2s" }}>{tile.label}</div>
-                        <div style={{ fontSize: 8, color: "#888888", lineHeight: 1.4 }}>{tile.sub}</div>
+                      <div
+                        key={i}
+                        onClick={() => open("interests")}
+                        className="border rounded-[9px] p-[11px_9px] cursor-pointer transition-all duration-200"
+                        style={{
+                          background: hoveredTile === i ? tileBg(tile.bg) : "var(--bg-card-inner)",
+                          borderColor: hoveredTile === i ? tile.color + "45" : "var(--border-subtle)",
+                          transform: hoveredTile === i ? "translateY(-2px)" : undefined,
+                        }}
+                        onMouseEnter={() => setHoveredTile(i)}
+                        onMouseLeave={() => setHoveredTile(null)}
+                      >
+                        <div className="text-[17px] mb-[5px] transition-colors duration-200" style={{ color: hoveredTile === i ? tile.color : "var(--text-faint)" }}>{tile.icon}</div>
+                        <div className="text-[10px] font-bold mb-[2px] transition-colors duration-200" style={{ color: hoveredTile === i ? tile.color : "var(--text-primary)" }}>{tile.label}</div>
+                        <div className="text-[8px] text-[#888] leading-[1.4]">{tile.sub}</div>
                       </div>
                     ))}
                   </div>
@@ -537,68 +513,77 @@ export default function Portfolio() {
               </Reveal>
 
               {/* ══ CONTACT ══ */}
-              <section id="contact" style={{ padding: "clamp(36px,6vw,56px) clamp(16px,4vw,20px)", background: "var(--contact-bg)", borderTop: "1px solid var(--border-subtle)", borderRadius: 9 }}>
-                <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-                  <div style={{ fontSize: 9, letterSpacing: 4, textTransform: "uppercase", color: "var(--text-faint)", fontWeight: 700, marginBottom: 12 }}>CONTACT</div>
-                  <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(22px,6vw,44px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-1.5px", marginBottom: 12, lineHeight: 1.1 }}>
-                    Let&apos;s build<br /><span style={{ color: "var(--accent)", fontStyle: "italic" }}>something together</span>
+              <section
+                id="contact"
+                className="px-[clamp(16px,4vw,20px)] py-[clamp(36px,6vw,56px)] bg-[var(--contact-bg)] border-t border-[var(--border-subtle)] rounded-[9px]"
+              >
+                <div className="max-w-[520px] mx-auto text-center">
+                  <div className="text-[9px] tracking-[4px] uppercase text-[var(--text-faint)] font-bold mb-3">CONTACT</div>
+                  <h2 className="font-serif text-[clamp(22px,6vw,44px)] font-bold text-[var(--text-primary)] tracking-[-1.5px] mb-3 leading-[1.1]">
+                    Let&apos;s build<br /><span className="text-[var(--accent)] italic">something together</span>
                   </h2>
-                  <p style={{ fontSize: "clamp(12px,1.5vw,13px)", color: "var(--text-faint)", lineHeight: 1.8, marginBottom: 28 }}>Open to internship opportunities, collaborations, and interesting conversations.</p>
-                  <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 24, flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center" }}>
-                    <a href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
-                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "var(--accent)", color: isLight ? "#fff" : "#0a0908", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
+                  <p className="text-[clamp(12px,1.5vw,13px)] text-[var(--text-faint)] leading-[1.8] mb-7">
+                    Open to internship opportunities, collaborations, and interesting conversations.
+                  </p>
+                  <div className={`flex gap-[10px] justify-center flex-wrap mb-6 ${isMobile ? "flex-col items-stretch" : "flex-row items-center"}`}>
+                    <a
+                      href="https://mail.google.com/mail/?view=cm&to=gjcshs.santos.ralphgeo@gmail.com"
+                      className="inline-flex items-center justify-center gap-[7px] bg-[var(--accent)] px-[22px] py-[10px] rounded-[7px] text-xs font-bold"
+                      style={{ color: isLight ? "#fff" : "#0a0908" }}
+                    >
                       <Mail size={13} /> Send a message
                     </a>
-                    <a href="https://www.facebook.com/ralph.santos.620659/"
-                      style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7, background: "transparent", color: "var(--text-muted)", padding: "10px 22px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "1px solid var(--border-strong)", fontFamily: "inherit" }}>
+                    <a
+                      href="https://www.facebook.com/ralph.santos.620659/"
+                      className="inline-flex items-center justify-center gap-[7px] bg-transparent text-[var(--text-muted)] px-[22px] py-[10px] rounded-[7px] text-xs font-semibold border border-[var(--border-strong)]"
+                    >
                       <Facebook size={13} /> Facebook
                     </a>
                   </div>
-                  <p style={{ color: "#ffff", fontSize: 11, borderTop: "1px solid var(--border-subtle)", paddingTop: 20, wordBreak: "break-all" }}>gjcshs.santos.ralphgeo@gmail.com</p>
+                  <p className="text-white text-[11px] border-t border-[var(--border-subtle)] pt-5 break-all">
+                    gjcshs.santos.ralphgeo@gmail.com
+                  </p>
                 </div>
               </section>
 
-              
             </div>
-
-
-
-
-
           </div>
         </div>
       </main>
-
-
 
       {/* ══ PANELS ══ */}
 
       {/* About */}
       <Panel open={panel === "about"} onClose={close}>
         <PanelHeader label="01 / About" title="Who I" italic="Am" onClose={close} />
-        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(16px,3vw,44px) clamp(14px,4vw,48px)" }}>
-          <div style={panelAboutGridStyle}>
+        <div className="flex-1 overflow-y-auto p-[clamp(16px,3vw,44px)_clamp(14px,4vw,48px)]">
+          <div
+            className="grid gap-[clamp(24px,4vw,40px)] items-start"
+            style={{ gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr" }}
+          >
             <div>
-              <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "var(--text-muted)", lineHeight: 1.9, marginBottom: 20 }}>
-                I&apos;m a <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>fourth-year CS student</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks.
+              <p className="text-[clamp(12px,1.4vw,16px)] text-[var(--text-muted)] leading-[1.9] mb-5">
+                I&apos;m a <span className="text-[var(--text-primary)] font-semibold">fourth-year CS student</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks.
               </p>
-              <p style={{ fontSize: "clamp(11px,1.2vw,14px)", color: "var(--text-faint)", lineHeight: 1.85 }}>
+              <p className="text-[clamp(11px,1.2vw,14px)] text-[var(--text-faint)] leading-[1.85]">
                 Currently looking for an internship where I can contribute to real engineering problems and keep growing as a developer.
               </p>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,7vw,88px)", fontWeight: 700, color: "var(--border-default)", lineHeight: 1, marginTop: 28, letterSpacing: "-4px", userSelect: "none" }}>CS<span style={{ color: "var(--accent)" }}>.</span></div>
+              <div className="font-serif text-[clamp(36px,7vw,88px)] font-bold text-[var(--border-default)] leading-none mt-7 tracking-[-4px] select-none">
+                CS<span className="text-[var(--accent)]">.</span>
+              </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="flex flex-col gap-5">
               {Object.entries(skills).map(([cat, items]) => (
                 <div key={cat}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "#ffff", marginBottom: 9, display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 12, height: 1, background: "#ffff", flexShrink: 0 }} />{cat}
+                  <div className="text-[10px] font-bold tracking-[3px] uppercase text-white mb-[9px] flex items-center gap-2">
+                    <div className="w-3 h-px bg-white flex-shrink-0" />{cat}
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  <div className="flex flex-wrap gap-[6px]">
                     {items.map(s => (
-                      <span key={s.label}
-                        style={{ padding: "5px 11px", background: "var(--bg-hover)", borderRadius: 5, fontSize: 12, color: "var(--text-muted)", fontWeight: 500, border: "1px solid var(--border-strong)", cursor: "default", display: "flex", alignItems: "center", gap: 5, transition: "color 0.2s, border-color 0.2s" }}
-                        onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.borderColor = "var(--accent)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = "var(--text-muted)"; e.currentTarget.style.borderColor = "var(--border-strong)"; }}>
+                      <span
+                        key={s.label}
+                        className="px-[11px] py-[5px] bg-[var(--bg-hover)] rounded-[5px] text-xs text-[var(--text-muted)] font-medium border border-[var(--border-strong)] cursor-default flex items-center gap-[5px] transition-colors duration-200 hover:text-[var(--accent)] hover:border-[var(--accent)]"
+                      >
                         {s.icon}{s.label}
                       </span>
                     ))}
@@ -613,40 +598,62 @@ export default function Portfolio() {
       {/* Projects */}
       <Panel open={panel === "projects"} onClose={close}>
         <PanelHeader label="02 / Projects" title="Things I've" italic="Shipped" onClose={close} />
-        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
+        <div className="flex-1 overflow-y-auto p-[clamp(14px,3vw,40px)_clamp(14px,4vw,48px)]">
           {projects.map((p, i) => (
-            <div key={i} style={panelProjRowStyle}
-              onMouseEnter={e => (e.currentTarget.style.opacity = "0.65")}
-              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}>
-              {!isMobile && <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#ffff", fontWeight: 700, paddingTop: 2 }}>{p.num}</div>}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: p.accent, fontWeight: 700, marginBottom: 5 }}>{p.tag}</div>
-                <h3 style={{ fontSize: "clamp(14px,2.5vw,22px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.5px", margin: "0 0 9px", fontFamily: "'Playfair Display',serif" }}>{p.title}</h3>
-                <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "var(--text-faint)", lineHeight: 1.7, margin: "0 0 12px", maxWidth: 480 }}>{p.description}</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                  {p.tech.map(t => <span key={t} style={{ padding: "3px 8px", borderRadius: 4, fontSize: 10, fontWeight: 600, fontFamily: "'JetBrains Mono',monospace", background: "var(--bg-hover)", color: "var(--text-faint)", border: "1px solid var(--border-strong)" }}>{t}</span>)}
+            <div
+              key={i}
+              className="py-[22px] border-b border-[var(--border-default)] transition-opacity duration-200 hover:opacity-65"
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "1fr" : "52px 1fr auto",
+                gap: isMobile ? 10 : 20,
+                alignItems: "start",
+              }}
+            >
+              {!isMobile && (
+                <div className="font-mono text-[11px] text-white font-bold pt-[2px]">{p.num}</div>
+              )}
+              <div className="min-w-0">
+                <div className="text-[9px] tracking-[3px] uppercase font-bold mb-[5px]" style={{ color: p.accent }}>{p.tag}</div>
+                <h3 className="text-[clamp(14px,2.5vw,22px)] font-bold text-[var(--text-primary)] tracking-[-0.5px] m-0 mb-[9px] font-serif">{p.title}</h3>
+                <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-faint)] leading-[1.7] m-0 mb-3 max-w-[480px]">{p.description}</p>
+                <div className="flex flex-wrap gap-[5px]">
+                  {p.tech.map(t => (
+                    <span key={t} className="px-2 py-[3px] rounded-[4px] text-[10px] font-semibold font-mono bg-[var(--bg-hover)] text-[var(--text-faint)] border border-[var(--border-strong)]">{t}</span>
+                  ))}
                 </div>
                 {isMobile && (
-                  <div style={{ display: "flex", gap: 14, marginTop: 10 }}>
-                    {p.github !== "#" && <a href={p.github} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text-faint)", fontWeight: 600 }}><Github size={12} /> Code</a>}
-                    <a href={p.demo} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600 }}><ExternalLink size={12} /> Demo</a>
+                  <div className="flex gap-[14px] mt-[10px]">
+                    {p.github !== "#" && (
+                      <a href={p.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] text-[var(--text-faint)] font-semibold">
+                        <Github size={12} /> Code
+                      </a>
+                    )}
+                    <a href={p.demo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: p.accent }}>
+                      <ExternalLink size={12} /> Demo
+                    </a>
                   </div>
                 )}
               </div>
               {!isMobile && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 9, paddingTop: 2, minWidth: 54 }}>
+                <div className="flex flex-col gap-[9px] pt-[2px] min-w-[54px]">
                   {p.github !== "#" && (
-                    <a href={p.github} target="_blank" rel="noopener noreferrer"
-                      style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text-faint)", fontWeight: 600, transition: "color 0.2s", whiteSpace: "nowrap" }}
-                      onMouseEnter={e => e.currentTarget.style.color = "var(--text-primary)"}
-                      onMouseLeave={e => e.currentTarget.style.color = "var(--text-faint)"}>
+                    <a
+                      href={p.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[11px] text-[var(--text-faint)] font-semibold whitespace-nowrap transition-colors duration-200 hover:text-[var(--text-primary)]"
+                    >
                       <Github size={12} /> Code
                     </a>
                   )}
-                  <a href={p.demo} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: p.accent, fontWeight: 600, transition: "opacity 0.2s", whiteSpace: "nowrap" }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
-                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+                  <a
+                    href={p.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[11px] font-semibold whitespace-nowrap transition-opacity duration-200 hover:opacity-70"
+                    style={{ color: p.accent }}
+                  >
                     <ExternalLink size={12} /> Demo
                   </a>
                 </div>
@@ -659,18 +666,30 @@ export default function Portfolio() {
       {/* Experience */}
       <Panel open={panel === "experience"} onClose={close}>
         <PanelHeader label="03 / Experience" title="The" italic="Journey" onClose={close} />
-        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
+        <div className="flex-1 overflow-y-auto p-[clamp(14px,3vw,40px)_clamp(14px,4vw,48px)]">
           {timeline.map((item, i) => (
-            <div key={i} style={panelExpRowStyle}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.65"}
-              onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-              <div style={{ paddingTop: 3, flexShrink: 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono',monospace", padding: "4px 9px", background: `${item.accent}18`, color: item.accent, borderRadius: 4, border: `1px solid ${item.accent}30`, display: "inline-block" }}>{item.year}</span>
+            <div
+              key={i}
+              className="py-5 border-b border-[var(--border-default)] transition-opacity duration-200 hover:opacity-65"
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "1fr" : "88px 1fr",
+                gap: isMobile ? 6 : 20,
+                alignItems: "start",
+              }}
+            >
+              <div className="pt-[3px] flex-shrink-0">
+                <span
+                  className="text-[11px] font-bold font-mono px-[9px] py-1 rounded-[4px] inline-block"
+                  style={{ background: `${item.accent}18`, color: item.accent, border: `1px solid ${item.accent}30` }}
+                >
+                  {item.year}
+                </span>
               </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, letterSpacing: 3, textTransform: "uppercase", color: "#ffff", fontWeight: 700, marginBottom: 5 }}>{item.company}</div>
-                <h3 style={{ fontSize: "clamp(13px,2vw,19px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.3px", margin: "0 0 7px", fontFamily: "'Playfair Display',serif" }}>{item.title}</h3>
-                <p style={{ fontSize: "clamp(11px,1.2vw,13px)", color: "var(--text-faint)", lineHeight: 1.7, maxWidth: 480 }}>{item.description}</p>
+              <div className="min-w-0">
+                <div className="text-[9px] tracking-[3px] uppercase text-white font-bold mb-[5px]">{item.company}</div>
+                <h3 className="text-[clamp(13px,2vw,19px)] font-bold text-[var(--text-primary)] tracking-[-0.3px] m-0 mb-[7px] font-serif">{item.title}</h3>
+                <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-faint)] leading-[1.7] max-w-[480px]">{item.description}</p>
               </div>
             </div>
           ))}
@@ -680,35 +699,59 @@ export default function Portfolio() {
       {/* Interests */}
       <Panel open={panel === "interests"} onClose={close}>
         <PanelHeader label="04 / Interests" title="Beyond the" italic="Code" onClose={close} />
-        <div style={{ display: "flex", padding: "0 clamp(14px,4vw,48px)", borderBottom: "1px solid var(--border-default)", flexShrink: 0, overflowX: "auto", scrollbarWidth: "none" }}>
+        <div className="flex px-[clamp(14px,4vw,48px)] border-b border-[var(--border-default)] flex-shrink-0 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
           {interests.map((b, i) => (
-            <button key={i} onClick={() => setActiveInterest(i)}
-              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "clamp(11px,1.3vw,12px)", fontWeight: 600, padding: "12px clamp(10px,2vw,16px)", color: activeInterest === i ? "var(--text-primary)" : "#ffff", borderBottom: activeInterest === i ? `2px solid ${b.accent}` : "2px solid transparent", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
-              <span style={{ color: activeInterest === i ? b.accent : "#ffff", transition: "color 0.2s", display: "flex" }}>{b.icon}</span>{b.category}
+            <button
+              key={i}
+              onClick={() => setActiveInterest(i)}
+              className="bg-transparent border-none cursor-pointer font-sans text-[clamp(11px,1.3vw,12px)] font-semibold px-[clamp(10px,2vw,16px)] py-3 transition-colors duration-200 flex items-center gap-[6px] whitespace-nowrap"
+              style={{
+                color: activeInterest === i ? "var(--text-primary)" : "#fff",
+                borderBottom: activeInterest === i ? `2px solid ${b.accent}` : "2px solid transparent",
+              }}
+            >
+              <span
+                className="flex transition-colors duration-200"
+                style={{ color: activeInterest === i ? b.accent : "#fff" }}
+              >
+                {b.icon}
+              </span>
+              {b.category}
             </button>
           ))}
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "clamp(14px,3vw,40px) clamp(14px,4vw,48px)" }}>
+        <div className="flex-1 overflow-y-auto p-[clamp(14px,3vw,40px)_clamp(14px,4vw,48px)]">
           {interests.map((b, i) => (
-            <div key={i} style={{ ...panelInterestsGridStyle, display: activeInterest === i ? "grid" : "none" }}>
+            <div
+              key={i}
+              className="items-start"
+              style={{
+                display: activeInterest === i ? "grid" : "none",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                gap: isMobile ? 20 : 40,
+              }}
+            >
               <div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 9, marginBottom: 18, color: b.accent }}>{b.icon}<span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase" }}>{b.category}</span></div>
-                <p style={{ fontSize: "clamp(12px,1.4vw,16px)", color: "var(--text-muted)", lineHeight: 1.85 }}>{b.description}</p>
-                <div style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(36px,7vw,80px)", fontWeight: 700, color: "var(--border-default)", lineHeight: 1, marginTop: 28, letterSpacing: "-3px", userSelect: "none" }}>
+                <div className="inline-flex items-center gap-[9px] mb-[18px]" style={{ color: b.accent }}>
+                  {b.icon}
+                  <span className="text-[10px] font-bold tracking-[3px] uppercase">{b.category}</span>
+                </div>
+                <p className="text-[clamp(12px,1.4vw,16px)] text-[var(--text-muted)] leading-[1.85]">{b.description}</p>
+                <div className="font-serif text-[clamp(36px,7vw,80px)] font-bold text-[var(--border-default)] leading-none mt-7 tracking-[-3px] select-none">
                   {b.category.split(" ")[0]}<span style={{ color: b.accent }}>.</span>
                 </div>
               </div>
               <div>
                 {b.items.map((item, j) => (
-                  <div key={j}
-                    style={{ padding: "14px 0", borderBottom: "1px solid var(--border-default)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, cursor: "default", transition: "opacity 0.2s" }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = "0.55"}
-                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 3 }}>{item.label}</div>
-                      <div style={{ fontSize: 11, color: "#ffff" }}>{item.sub}</div>
+                  <div
+                    key={j}
+                    className="py-[14px] border-b border-[var(--border-default)] flex justify-between items-center gap-3 cursor-default transition-opacity duration-200 hover:opacity-55"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-semibold text-[var(--text-primary)] mb-[3px]">{item.label}</div>
+                      <div className="text-[11px] text-white">{item.sub}</div>
                     </div>
-                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: b.accent, flexShrink: 0 }} />
+                    <div className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: b.accent }} />
                   </div>
                 ))}
               </div>
