@@ -13,6 +13,7 @@ import SkillsBubble from "./components/SkillCarousel";
 import ShootingStars from "./components/Shootingstars";
 import { useTheme } from "./components/Themeprovider";
 import SpotifyWidget from "./components/Spotifywidget";
+import { json } from "stream/consumers";
 
 interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
 interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
@@ -40,13 +41,29 @@ function GitHubStats({ username }: { username: string }) {
   const [repos, setRepos] = useState<string>("…");
   const [contributions, setContributions] = useState<string>("…");
   useEffect(() => {
-    fetch(`https://api.github.com/users/${username}`)
-      .then(r => r.json()).then(d => setRepos(String(d.public_repos ?? "—"))).catch(() => setRepos("—"));
-    fetch(`https://github-contributions-api.jogruber.de/v4/${username}`)
-      .then(r => r.json()).then(d => {
-        const total = Object.values(d.total as Record<string, number>).reduce((a, v) => a + v, 0);
+    const fetchData = async () => {
+      try {
+        const [githubRes, contributionsRes] = await Promise.all([
+          fetch(`https://api.github.com/users/${username}`),
+          fetch(`https://github-contributions-api.jogruber.de/v4/${username}`),
+        ]);
+
+        const githubData = await githubRes.json();
+        const contributionsData = await contributionsRes.json();
+
+        setRepos(String(githubData.public_repos ?? "—"));
+
+        const total = Object.values(contributionsData.total as Record<string, number>)
+          .reduce((a, v) => a + v, 0);
         setContributions(String(total));
-      });
+
+      } catch (error) {
+        setRepos("—");
+        setContributions("—");
+      }
+    };
+
+    fetchData();
   }, [username]);
   return (
     <div className="flex gap-2 mb-2.5">
@@ -105,13 +122,18 @@ function LiveClock() {
     const tick = () => setTime(new Date().toLocaleTimeString("en-US", { hour12: false }));
     tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
   }, []);
-  return <span className="font-mono text-xs text-[var(--text-muted)] tracking-wide">{time}</span>;
+  return (
+    <div className="flex items-center gap-1">
+      <div className="w-[5px] h-[5px] rounded-full bg-[var(--accent)] flex-shrink-0 animate-pulse" />
+      <span className="font-mono text-xs text-[var(--text-muted)] tracking-wide">{time}</span>
+    </div>
+
+  );
 }
 
 function VisitorCount() {
   return (
     <div className="inline-flex items-center gap-[5px]">
-      <div className="w-[5px] h-[5px] rounded-full bg-[var(--accent)] flex-shrink-0 animate-pulse" />
       <img
         src="https://api.visitorbadge.io/api/visitors?path=github.com%2Fralph12322&labelColor=%23000000&countColor=%232dd4bf&style=flat"
         alt="visitors"
@@ -136,7 +158,7 @@ const timeline: TimelineItem[] = [
 ];
 
 const interests: Interest[] = [
-  { category: "Music", icon: <Music className="w-[18px] h-[18px]" />, accent: "#2dd4bf", description: "Music is woven into my day — OPM when I need to feel something, lo-fi when I need to focus.", items: [{ label: "OPM / Filipino Music", sub: "Ben&Ben, IV of Spades, Cup of Joe, SB19" }, { label: "Lo-fi / Chill", sub: "Late-night coding sessions and deep focus" }, { label: "Bedroom Pop", sub: "Soft, dreamy vibes for any mood" }, { label: "Acoustic Sets", sub: "Raw, stripped-back and emotional" }] },
+  { category: "Music", icon: <Music className="w-[18px] h-[18px]" />, accent: "#2dd4bf", description: "Music is woven into my day — OPM when I need to feel something, lo-fi when I need to focus.", items: [{ label: "OPM / Filipino Music", sub: "Ben&Ben, IV of Spades, Cup of Joe, Zack Tabudlo" }, { label: "Lo-fi / Chill", sub: "Late-night coding sessions and deep focus" }, { label: "Bedroom Pop", sub: "Soft, dreamy vibes for any mood" }, { label: "Acoustic Sets", sub: "Raw, stripped-back and emotional" }] },
   { category: "Film & Shows", icon: <Film className="w-[18px] h-[18px]" />, accent: "#14b8a6", description: "A good story gets me every time — emotional anime arcs, slow-burn romances, high-stakes thrillers.", items: [{ label: "Anime", sub: "AOT, Haikyuu, Vinland Saga, Demon Slayer" }, { label: "Romance / Drama", sub: "Kilig moments and emotional gut punches" }, { label: "Action / Thriller", sub: "Edge-of-seat tension and satisfying payoffs" }, { label: "Slice of Life", sub: "Calm, relatable, oddly comforting" }] },
   { category: "Gaming", icon: <Gamepad2 className="w-[18px] h-[18px]" />, accent: "#5eead4", description: "My go-to unwind — anything with a great story or competitive depth, mobile or PC.", items: [{ label: "Story-Driven RPGs", sub: "Deep lore and memorable characters" }, { label: "Battle Royale / FPS", sub: "When it's time to go sweaty mode" }, { label: "Indie Gems", sub: "Surprising, creative, underrated finds" }, { label: "Mobile Games", sub: "Quick sessions on the go" }] }
 ];
@@ -224,7 +246,7 @@ export default function Portfolio() {
               />
               {/* Top bar */}
               <div className="absolute top-[10px] left-[10px] right-[10px] flex justify-between items-center flex-wrap gap-1">
-                <LiveClock /> <VisitorCount/>
+                <LiveClock /> <VisitorCount />
               </div>
               {/* Gradient overlay */}
               <div className="absolute bottom-0 left-0 right-0 h-[55%] bg-gradient-to-t from-[var(--bg-card)] to-transparent pointer-events-none" />
@@ -245,7 +267,7 @@ export default function Portfolio() {
             <Reveal>
               <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_14px]">
                 <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75]">
-                  A Philippines-based <span className="text-[var(--accent)] font-semibold">4th-year CS student</span> building scalable web apps — from price trackers to music platforms. MERN stack is my comfort zone.
+                  A Philippines-based <span className="text-[var(--accent)] font-semibold">4th-year CS student</span> building scalable web apps — from price trackers to music platforms. Expanding my knowledge overtime.
                 </p>
               </div>
             </Reveal>
@@ -541,7 +563,7 @@ export default function Portfolio() {
                     </a>
                   </div>
                   <p className="text-white text-[11px] border-t border-[var(--border-subtle)] pt-5 break-all">
-                    gjcshs.santos.ralphgeo@gmail.com
+                    ralphgeosantos.dev@gmail.com
                   </p>
                 </div>
               </section>
@@ -737,7 +759,7 @@ export default function Portfolio() {
                   <span className="text-[10px] font-bold tracking-[3px] uppercase">{b.category}</span>
                 </div>
                 <p className="text-[clamp(12px,1.4vw,16px)] text-[var(--text-muted)] leading-[1.85]">{b.description}</p>
-                <div className="font-serif text-[clamp(36px,7vw,80px)] font-bold text-[var(--border-default)] leading-none mt-7 tracking-[-3px] select-none">
+                <div className="font-serif text-[clamp(36px,7vw,80px)] font-bold text-[var(--text-muted)] leading-none mt-7 tracking-[-3px] select-none">
                   {b.category.split(" ")[0]}<span style={{ color: b.accent }}>.</span>
                 </div>
               </div>

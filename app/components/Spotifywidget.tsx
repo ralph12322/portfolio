@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from "react";
 import { Music } from "lucide-react";
+import { json } from "stream/consumers";
 
 interface TrackData {
     isPlaying: boolean;
@@ -21,14 +22,20 @@ export default function SpotifyWidget() {
     const discRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const fetchData = () =>
-            fetch("/api/lastfm")
-                .then(r => r.json())
-                .then(setData)
-                .catch(() => { })
-                .finally(() => setLoading(false));
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const res = await fetch("/api/lastfm")
+                const data = await res.json()
+                setData(data)
+            } catch (error) {
+                console.log(error)
+            } finally{
+                setLoading(false)
+            }
+        }
         fetchData();
-        const id = setInterval(fetchData, 3000); 
+        const id = setInterval(fetchData, 3000);
         return () => clearInterval(id);
     }, []);
 
@@ -195,6 +202,6 @@ export default function SpotifyWidget() {
     );
 
     return data?.url ? (
-            content
+        content
     ) : content;
 }
