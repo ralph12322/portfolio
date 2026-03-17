@@ -24,13 +24,15 @@ export default function SpotifyWidget() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setLoading(true)
                 const res = await fetch("/api/lastfm")
-                const data = await res.json()
-                setData(data)
+                const datas = await res.json()
+                if (data != datas) {
+                    setData(datas)
+                }
+
             } catch (error) {
                 console.log(error)
-            } finally{
+            } finally {
                 setLoading(false)
             }
         }
