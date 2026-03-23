@@ -13,7 +13,6 @@ import SkillsBubble from "./components/SkillCarousel";
 import ShootingStars from "./components/Shootingstars";
 import { useTheme } from "./components/Themeprovider";
 import SpotifyWidget from "./components/Spotifywidget";
-import { json } from "stream/consumers";
 
 interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
 interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
@@ -144,9 +143,48 @@ function VisitorCount() {
 }
 
 const projects: Project[] = [
-  { title: "TrackTag", tag: "Thesis Project", description: "Full-stack price tracking platform monitoring apparel prices and reviews from Amazon and Lazada via automated web scraping. Dashboard to visualize price history and trends.", tech: ["Next.js", "TypeScript", "Node.js", "MongoDB"], github: "https://github.com/ralph12322/tracktag", demo: "https://tracktag-production.up.railway.app/", accent: "#2dd4bf", num: "01" },
-  { title: "Spotify Clone", tag: "Hubby Project", description: "Responsive music streaming app inspired by Spotify's UI. Full audio upload, playback controls, playlist management, and cloud-hosted media via Cloudinary.", tech: ["React", "Node.js", "JavaScript", "Tailwind CSS", "Cloudinary", "MongoDB"], github: "https://github.com/ralph12322/Spotify-Clone", demo: "https://lindsaaayspoti.vercel.app/", accent: "#14b8a6", num: "02" },
-  { title: "EmoVOX", tag: "Baby-Thesis", description: "Emotion-aware translation app integrating speech-to-text, text-to-speech, and real-time emotion detection to enhance how people communicate.", tech: ["React", "Node.js", "Express", "Tailwind CSS"], github: "#", demo: "https://emovox.vercel.app/", accent: "#5eead4", num: "03" }
+  {
+    title: "TrackTag",
+    tag: "Thesis Project",
+    description: "Full-stack price tracking platform monitoring apparel prices and reviews from Amazon and Lazada via automated web scraping. Dashboard to visualize price history and trends.",
+    tech: ["Next.js", "TypeScript", "Node.js", "MongoDB"],
+    github: "https://github.com/ralph12322/tracktag",
+    demo: "https://tracktag-production.up.railway.app/",
+    accent: "#2dd4bf", num: "01"
+  },
+  {
+    title: "Spotify Clone",
+    tag: "Hubby Project",
+    description: "Responsive music streaming app inspired by Spotify's UI. Full audio upload, playback controls, playlist management, and cloud-hosted media via Cloudinary.",
+    tech: ["React", "Node.js", "JavaScript", "Tailwind CSS", "Cloudinary", "MongoDB"],
+    github: "https://github.com/ralph12322/Spotify-Clone",
+    demo: "https://lindsaaayspoti.vercel.app/",
+    accent: "#14b8a6", num: "02"
+  },
+  {
+    title: "EmoVOX",
+    tag: "Baby-Thesis",
+    description: "Emotion-aware translation app integrating speech-to-text, text-to-speech, and real-time emotion detection to enhance how people communicate.",
+    tech: ["React", "Node.js", "Express", "Tailwind CSS"],
+    github: "#", demo: "https://emovox.vercel.app/",
+    accent: "#5eead4", num: "03"
+  },
+  {
+    title: "BingeGazette",
+    tag: "Project",
+    description: "Built a Youtube video player without ads, by embedding videos using youtube api",
+    tech: ["Next.js", "Tailwind CSS", "Supabase"],
+    github: "https://github.com/ralph12322/psite", demo: "https://bingewatcher.vercel.app/",
+    accent: "#5eead4", num: "04"
+  },
+  {
+    title: "Pokemon Fetch",
+    tag: "Project",
+    description: "Built a Youtube video player without ads, by embedding videos using youtube api",
+    tech: ["HTML", "CSS", "Javascript"],
+    github: "https://github.com/ralph12322/PokemonFetch", demo: "https://pokemon-fetch-black.vercel.app/",
+    accent: "#5eead4", num: "05"
+  }
 ];
 
 const timeline: TimelineItem[] = [
