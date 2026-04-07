@@ -317,8 +317,8 @@ export default function Portfolio() {
                   <Layers size={15} color="var(--accent)" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-[var(--text-primary)] mb-[1px]">Fullstack Dev Intern</div>
-                  <div className="text-[10px] text-[var(--text-faint)] overflow-hidden text-ellipsis whitespace-nowrap">Jurisprudence Application Services</div>
+                  <div className="text-xs font-bold text-[var(--text-primary)] mb-[1px]">Fullstack Dev Freelancer</div>
+                  <div className="text-[10px] text-[var(--text-faint)] overflow-hidden text-ellipsis whitespace-nowrap">Jur.ph</div>
                 </div>
               </div>
             </Reveal>
@@ -397,7 +397,8 @@ export default function Portfolio() {
                     <div className="relative">
                       <div className="absolute left-[6px] top-2 bottom-2 w-px bg-[var(--border-default)]" />
                       {[
-                        { period: "2026–Now", title: "Fullstack Dev Intern", co: "Jurisprudence App. Services", accent: "#2dd4bf" },
+                        { period: "2026–(May-April)", title: "Fullstack Dev Freelancer", co: "Jur.ph", accent: "#2dd4bf" },
+                        { period: "2026–(Jan-Mar)", title: "Fullstack Dev Intern", co: "Jurisprudence App. Services", accent: "#2dd4bf" },
                         { period: "2025", title: "Thesis Defense", co: "University · TrackTag", accent: "#99f6e4" },
                         { period: "2022–26", title: "B.S. Computer Science", co: "University", accent: "#0d9488" },
                       ].map((item, i) => (
