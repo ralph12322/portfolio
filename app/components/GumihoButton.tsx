@@ -68,21 +68,7 @@ export default function GumihoButton() {
               alt="My Gumiho ♡"
               style={{ width: "100%", display: "block", objectFit: "cover" }}
             />
-            {/* Label */}
-            <div
-              style={{
-                padding: "7px 12px 9px",
-                textAlign: "center",
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: "italic",
-                fontSize: 10,
-                color: "var(--accent, #2dd4bf)",
-                letterSpacing: "0.04em",
-                background: "linear-gradient(to bottom, #0a1a1a, #0d2424)",
-              }}
-            >
-              My Gumiho ♡
-            </div>
+      
           </div>
 
           {/* Little tail */}
