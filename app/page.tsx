@@ -13,6 +13,7 @@ import SkillsBubble from "./components/SkillCarousel";
 import ShootingStars from "./components/Shootingstars";
 import { useTheme } from "./components/Themeprovider";
 import SpotifyWidget from "./components/Spotifywidget";
+import GumihoButton from "./components/GumihoButton";
 
 interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
 interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
@@ -304,8 +305,8 @@ export default function Portfolio() {
             {/* Blurb */}
             <Reveal>
               <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_14px]">
-                <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75]">
-                  A Philippines-based <span className="text-[var(--accent)] font-semibold">4th-year CS student</span> building scalable web apps — from price trackers to music platforms. Expanding my knowledge overtime.
+                <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75] text-center">
+                 My <span className="text-[var(--accent)] font-semibold"><GumihoButton/></span>♡♡♡
                 </p>
               </div>
             </Reveal>
@@ -368,12 +369,12 @@ export default function Portfolio() {
           >
             <div className="flex flex-col gap-3 min-w-0 pb-12">
 
-              {/* Tagline */}
+              {/* My gumiho onhover show the picture of my girlfriend */}
               <Reveal>
                 <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[clamp(14px,2vw,18px)_clamp(14px,2vw,20px)]">
-                  <p className="text-[clamp(12px,1.4vw,16px)] text-[var(--text-muted)] leading-[1.75]">
-                    Building at the intersection of <span className="text-[var(--accent)] font-semibold">full-stack engineering</span>, clean UI, and <span className="text-[var(--accent-dim)] font-semibold">developer experience</span> — crafting apps that are fast, scalable, and genuinely useful.
-                  </p>
+                  <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75]">
+                  A Philippines-based <span className="text-[var(--accent)] font-semibold">4th-year CS student</span> building scalable web apps — from price trackers to music platforms. Expanding my knowledge overtime.
+                </p>
                 </div>
               </Reveal>
 
