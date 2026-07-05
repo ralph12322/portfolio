@@ -189,6 +189,7 @@ const projects: Project[] = [
 ];
 
 const timeline: TimelineItem[] = [
+  { year: "2026", title: "Fullstack Web Developer Freelancer", company: "Jur.ph", description: "Built Team Subscription module for Jur.ph", accent: "#2dd4bf" },
   { year: "2026", title: "Fullstack Web Developer Intern", company: "Jurisprudence Application Services", description: "Built Paysync — a payroll automation system designed for accountants.", accent: "#2dd4bf" },
   { year: "2025", title: "Thesis Defense", company: "University", description: "Defended TrackTag successfully. Earned commendation from the panel.", accent: "#99f6e4" },
   { year: "2024", title: "Baby-Thesis Completion", company: "University Lab", description: "Shipped EmoVOX as a collaborative AI + speech processing research project.", accent: "#5eead4" },
@@ -279,7 +280,7 @@ export default function Portfolio() {
               style={isMobile ? { height: "56vw", minHeight: 220, maxHeight: 340 } : { aspectRatio: "3/3.8" }}
             >
               <img
-                src="./heroMe.jfif"
+                src="./heroMe.jpg"
                 alt="Ralph Geo Santos"
                 className="w-full h-full object-cover object-top block"
               />
@@ -298,18 +299,9 @@ export default function Portfolio() {
                 <h1 className="font-serif text-[clamp(18px,3vw,26px)] font-bold text-[var(--text-primary)] leading-[1.2] tracking-[-0.5px]">
                   Ralph Geo <span className="text-[var(--accent)] italic">Santos</span>
                 </h1>
-                <div className="text-[11px] text-[var(--text-muted)] mt-[3px]">4th Year CS · Full-Stack Developer</div>
+                <div className="text-[11px] text-[var(--text-muted)] mt-[3px]">Full-Stack Web Developer</div>
               </div>
             </div>
-
-            {/* Blurb */}
-            <Reveal>
-              <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[13px_14px]">
-                <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75] text-center">
-                 My <span className="text-[var(--accent)] font-semibold"><GumihoButton/></span>♡♡♡
-                </p>
-              </div>
-            </Reveal>
 
             {/* Role badge */}
             <Reveal>
@@ -373,7 +365,7 @@ export default function Portfolio() {
               <Reveal>
                 <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[clamp(14px,2vw,18px)_clamp(14px,2vw,20px)]">
                   <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-muted)] leading-[1.75]">
-                  A Philippines-based <span className="text-[var(--accent)] font-semibold">4th-year CS student</span> building scalable web apps — from price trackers to music platforms. Expanding my knowledge overtime.
+                  A Philippines-based <span className="text-[var(--accent)] font-semibold">Full-Stack Web Developer</span> building scalable web apps — from price trackers to music platforms. Expanding my knowledge overtime.
                 </p>
                 </div>
               </Reveal>
@@ -625,10 +617,10 @@ export default function Portfolio() {
           >
             <div>
               <p className="text-[clamp(12px,1.4vw,16px)] text-[var(--text-muted)] leading-[1.9] mb-5">
-                I&apos;m a <span className="text-[var(--text-primary)] font-semibold">fourth-year CS student</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks.
+                I&apos;m a <span className="text-[var(--text-primary)] font-semibold">Newly Graduated</span> who loves building things that work well and look clean. I specialize in full-stack development — REST APIs, MVC architecture, and modern JS frameworks.
               </p>
               <p className="text-[clamp(11px,1.2vw,14px)] text-[var(--text-faint)] leading-[1.85]">
-                Currently looking for an internship where I can contribute to real engineering problems and keep growing as a developer.
+                Currently looking for my first Job where I can contribute to real engineering problems and keep growing as a developer.
               </p>
               <div className="font-serif text-[clamp(36px,7vw,88px)] font-bold text-[var(--border-default)] leading-none mt-7 tracking-[-4px] select-none">
                 CS<span className="text-[var(--accent)]">.</span>
@@ -655,6 +647,24 @@ export default function Portfolio() {
             </div>
           </div>
         </div>
+        <div className="flex justify-center py-8">
+  <div className="flex justify-center">
+  <img
+    src="./myDiploma.jfif"
+    alt="Bachelor of Science Diploma"
+    className="
+      w-full
+      max-w-xl
+      h-auto
+      rounded-lg
+      border
+      border-[var(--border-default)]
+      shadow-lg
+      object-contain
+    "
+  />
+</div>
+</div>
       </Panel>
 
       {/* Projects */}
