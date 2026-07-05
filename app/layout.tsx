@@ -4,7 +4,7 @@ import { ThemeProvider } from "./components/Themeprovider";
 
 export const metadata: Metadata = {
   title: "Santos, Ralph Geo",
-  description: "Full-Stack Developer · 4th Year CS Student",
+  description: "Full-Stack Developer",
 };
 
 export const viewport = {
