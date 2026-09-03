@@ -14,6 +14,7 @@ import ShootingStars from "./components/Shootingstars";
 import { useTheme } from "./components/Themeprovider";
 import SpotifyWidget from "./components/Spotifywidget";
 import GumihoButton from "./components/GumihoButton";
+import CertificationSlideshow from "./components/Certification";
 
 interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
 interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
@@ -310,8 +311,8 @@ export default function Portfolio() {
                   <Layers size={15} color="var(--accent)" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-[var(--text-primary)] mb-[1px]">Fullstack Dev Freelancer</div>
-                  <div className="text-[10px] text-[var(--text-faint)] overflow-hidden text-ellipsis whitespace-nowrap">Jur.ph</div>
+                  <div className="text-xs font-bold text-[var(--text-primary)] mb-[1px]">Part time Instructor</div>
+                  <div className="text-[10px] text-[var(--text-faint)] overflow-hidden text-ellipsis whitespace-nowrap">STI SantaRosa</div>
                 </div>
               </div>
             </Reveal>
@@ -415,40 +416,7 @@ export default function Portfolio() {
 
                 {/* Roadmap */}
                 <Reveal>
-                  <div className="bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden p-[15px]">
-                    <div className="flex justify-between items-center mb-[14px]">
-                      <div className="text-[9px] font-bold tracking-[3px] uppercase text-[var(--text-faint)]">Journey Roadmap</div>
-                      <span className="text-[9px] text-white italic font-serif flex-shrink-0">Aspirational</span>
-                    </div>
-                    <div className="relative pl-2">
-                      <div className="absolute left-2 top-[5px] bottom-[5px] w-[2px] rounded-[2px] opacity-30" style={{ background: "linear-gradient(to bottom,#0d9488,#14b8a6,#2dd4bf,#5eead4,#99f6e4,#ccfbf1)" }} />
-                      {roadmap.map((step, i) => (
-                        <div key={i} className="grid gap-[7px] mb-[9px] last:mb-0" style={{ gridTemplateColumns: "20px 1fr" }}>
-                          <div className="flex justify-center pt-[1px] relative">
-                            {step.status === "done" ? (
-                              <div className="w-3 h-3 rounded-full border-2 border-[var(--bg-page)] flex items-center justify-center flex-shrink-0" style={{ background: step.accent }}>
-                                <CheckCircle2 size={6} color="var(--bg-page)" strokeWidth={3} />
-                              </div>
-                            ) : step.status === "active" ? (
-                              <div className="w-3 h-3 rounded-full border-2 border-[var(--bg-page)] animate-pulse flex-shrink-0" style={{ background: step.accent }} />
-                            ) : (
-                              <div className="w-3 h-3 rounded-full bg-transparent flex-shrink-0" style={{ border: `2px solid ${step.accent}30` }} />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-[8px] font-mono text-[#b3b3b3]">{step.phase}</div>
-                            <div className="text-[11px] font-bold" style={{ color: step.status === "future" ? "#fff" : "var(--text-secondary)" }}>{step.label}</div>
-                            <div className="text-[9px] text-[#888]">{step.desc}</div>
-                            {step.status === "active" && (
-                              <div className="mt-[2px] inline-flex items-center gap-[3px] rounded-[6px] text-[7px] font-bold tracking-wide px-[5px] py-[1px]" style={{ background: step.accent + "18", color: step.accent }}>
-                                <Zap size={6} className="animate-pulse" /> NOW
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <CertificationSlideshow/>
                 </Reveal>
               </div>
 
