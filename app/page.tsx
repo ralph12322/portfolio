@@ -16,7 +16,7 @@ import SpotifyWidget from "./components/Spotifywidget";
 import GumihoButton from "./components/GumihoButton";
 import CertificationSlideshow from "./components/Certification";
 
-interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; accent: string; num: string; }
+interface Project { title: string; tag: string; description: string; tech: string[]; github: string; demo: string; num: string; }
 interface TimelineItem { year: string; title: string; company: string; description: string; accent: string; }
 interface InterestItem { label: string; sub: string; }
 interface Interest { category: string; icon: ReactNode; accent: string; description: string; items: InterestItem[]; }
@@ -152,7 +152,7 @@ const projects: Project[] = [
     tech: ["Next.js", "TypeScript", "Node.js", "MongoDB"],
     github: "https://github.com/ralph12322/tracktag",
     demo: "https://tracktag-production.up.railway.app/",
-    accent: "#2dd4bf", num: "01"
+    num: "01",
   },
   {
     title: "Spotify Clone",
@@ -161,7 +161,7 @@ const projects: Project[] = [
     tech: ["React", "Node.js", "JavaScript", "Tailwind CSS", "Cloudinary", "MongoDB"],
     github: "https://github.com/ralph12322/Spotify-Clone",
     demo: "https://lindsaaayspoti.vercel.app/",
-    accent: "#14b8a6", num: "02"
+    num: "02"
   },
   {
     title: "EmoVOX",
@@ -169,7 +169,7 @@ const projects: Project[] = [
     description: "Emotion-aware translation app integrating speech-to-text, text-to-speech, and real-time emotion detection to enhance how people communicate.",
     tech: ["React", "Node.js", "Express", "Tailwind CSS"],
     github: "#", demo: "https://emovox.vercel.app/",
-    accent: "#5eead4", num: "03"
+    num: "03"
   },
   {
     title: "BingeGazette",
@@ -177,7 +177,7 @@ const projects: Project[] = [
     description: "Built a Youtube video player without ads, by embedding videos using youtube api",
     tech: ["Next.js", "Tailwind CSS", "Supabase"],
     github: "https://github.com/ralph12322/psite", demo: "https://bingewatcher.vercel.app/",
-    accent: "#5eead4", num: "04"
+    num: "04"
   },
   {
     title: "Pokemon Fetch",
@@ -185,7 +185,7 @@ const projects: Project[] = [
     description: "Built a Youtube video player without ads, by embedding videos using youtube api",
     tech: ["HTML", "CSS", "Javascript"],
     github: "https://github.com/ralph12322/PokemonFetch", demo: "https://pokemon-fetch-black.vercel.app/",
-    accent: "#5eead4", num: "05"
+    num: "05"
   }
 ];
 
@@ -462,9 +462,8 @@ export default function Portfolio() {
                       <div
                         key={i}
                         className="bg-[var(--bg-card-inner)] border border-[var(--border-subtle)] rounded-[9px] p-3 transition-transform duration-200 cursor-default hover:-translate-y-[2px]"
-                        style={{ borderTop: `2px solid ${p.accent}` }}
                       >
-                        <div className="text-[8px] tracking-[2px] uppercase font-bold mb-1 font-mono" style={{ color: p.accent }}>{p.tag}</div>
+                        <div className="text-[8px] tracking-[2px] uppercase font-bold mb-1 font-mono">{p.tag}</div>
                         <div className="text-[13px] font-bold text-[var(--text-primary)] mb-[5px] font-serif">{p.title}</div>
                         <div className="text-[10px] text-[#888] leading-[1.5] mb-2">{p.description.slice(0, 85)}…</div>
                         <div className="flex flex-wrap gap-[3px] mb-[9px]">
@@ -488,7 +487,6 @@ export default function Portfolio() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-[10px] flex items-center gap-[3px] font-semibold transition-opacity duration-200 hover:opacity-70"
-                            style={{ color: p.accent }}
                           >
                             <ExternalLink size={10} /> Demo
                           </a>
@@ -642,7 +640,7 @@ export default function Portfolio() {
           {projects.map((p, i) => (
             <div
               key={i}
-              className="py-[22px] border-b border-[var(--border-default)] transition-opacity duration-200 hover:opacity-65"
+              className="py-[22px] transition-opacity duration-200 hover:opacity-65"
               style={{
                 display: "grid",
                 gridTemplateColumns: isMobile ? "1fr" : "52px 1fr auto",
