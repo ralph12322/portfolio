@@ -652,7 +652,7 @@ export default function Portfolio() {
                 <div className="font-mono text-[11px] text-white font-bold pt-[2px]">{p.num}</div>
               )}
               <div className="min-w-0">
-                <div className="text-[9px] tracking-[3px] uppercase font-bold mb-[5px]" style={{ color: p.accent }}>{p.tag}</div>
+                <div className="text-[9px] tracking-[3px] uppercase font-bold mb-[5px]">{p.tag}</div>
                 <h3 className="text-[clamp(14px,2.5vw,22px)] font-bold text-[var(--text-primary)] tracking-[-0.5px] m-0 mb-[9px] font-serif">{p.title}</h3>
                 <p className="text-[clamp(11px,1.2vw,13px)] text-[var(--text-faint)] leading-[1.7] m-0 mb-3 max-w-[480px]">{p.description}</p>
                 <div className="flex flex-wrap gap-[5px]">
@@ -667,7 +667,7 @@ export default function Portfolio() {
                         <Github size={12} /> Code
                       </a>
                     )}
-                    <a href={p.demo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: p.accent }}>
+                    <a href={p.demo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-[11px] font-semibold">
                       <ExternalLink size={12} /> Demo
                     </a>
                   </div>
@@ -690,7 +690,6 @@ export default function Portfolio() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-[11px] font-semibold whitespace-nowrap transition-opacity duration-200 hover:opacity-70"
-                    style={{ color: p.accent }}
                   >
                     <ExternalLink size={12} /> Demo
                   </a>
