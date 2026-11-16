@@ -186,6 +186,14 @@ const projects: Project[] = [
     tech: ["HTML", "CSS", "Javascript"],
     github: "https://github.com/ralph12322/PokemonFetch", demo: "https://pokemon-fetch-black.vercel.app/",
     num: "05"
+  },
+  {
+    title: "Team Payaman Community Site",
+    tag: "Project",
+    description: "Built a Community website for Team payaman which allows them to have their respective merch sales as well and team payaman fair",
+    tech: ["Next.js, MongoDB, Vercel"],
+    github: "https://github.com/ralph12322/", demo: "https://teampayaman.vercel.app/",
+    num: "06"
   }
 ];
 
@@ -673,7 +681,7 @@ export default function Portfolio() {
                   </div>
                 )}
               </div>
-              {!isMobile && (
+              {!isMobile && (   
                 <div className="flex flex-col gap-[9px] pt-[2px] min-w-[54px]">
                   {p.github !== "#" && (
                     <a
